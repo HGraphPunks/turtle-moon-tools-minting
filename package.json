@@ -1,0 +1,82 @@
+{
+  "name": "turtle-moon-tools",
+  "version": "0.1.0",
+  "private": false,
+  "author": "Turtle Moon",
+  "description": "Turtle Moon Tools - Minting",
+  "homepage": "./",
+  "productName": "Turtle Moon Tools",
+  "dependencies": {
+    "@electron/remote": "^2.0.1",
+    "@mui/icons-material": "^5.0.4",
+    "@mui/lab": "latest",
+    "@mui/material": "latest",
+    "@mui/styled-engine-sc": "latest",
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "@xact-wallet-sdk/client": "^1.0.1-alpha.0",
+    "@xact-wallet-sdk/nft": "^1.0.14",
+    "cross-env": "^7.0.3",
+    "dotenv": "^10.0.0",
+    "dotenv-expand": "^5.1.0",
+    "electron-is-dev": "^2.0.0",
+    "electronmon": "^2.0.2",
+    "ipfs-http-client": "^53.0.0",
+    "jquery": "^3.6.0",
+    "js-logger": "^1.6.1",
+    "nft.storage": "^3.2.2",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-scripts": "latest",
+    "styled-components": "latest"
+  },
+  "main": "public/electron.js",
+  "build": {
+    "appId": "tools.turtlemoon.io",
+    "productName": "Turtle Moon Tools",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "deb"
+    }
+  },
+  "scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "dev": "concurrently -k \"BROWSER=none npm start\" \"npm:electron\"",
+    "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
+    "electron:package:mac": "yarn build && electron-builder -m -c.extraMetadata.main=build/electron.js",
+    "electron:package:win": "yarn build && electron-builder -w -c.extraMetadata.main=build/electron.js",
+    "electron:package:linux": "yarn build && electron-builder -l -c.extraMetadata.main=build/electron.js"
+  },
+  "browserslist": {
+    "production": [
+      "last 1 electron version"
+    ],
+    "development": [
+      "last 1 electron version"
+    ]
+  },
+  "devDependencies": {
+    "@craco/craco": "latest",
+    "concurrently": "^6.3.0",
+    "electron": "^15.3.0",
+    "electron-is-dev": "^2.0.0",
+    "electron-packager": "^15.4.0",
+    "wait-on": "^6.0.0"
+  }
+}

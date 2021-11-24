@@ -1,0 +1,117 @@
+import { Blob, NFTStorage, File } from "nft.storage";
+
+export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, hederaMainnetEnv) => {
+  return new Promise(async (resolve, reject) => {
+
+    const hashLipsImagesArray = Array.from(hashLipsImages)
+    const numOfNFTS = hashLipsImagesArray.length;
+    const numOfMetadata = hashlipsMetaData.length;
+
+    if (numOfNFTS !== numOfMetadata) {
+      console.error('Num of images and metadata are not matching. Check the files and JSON uploaded')
+      reject();
+    }
+
+    // Set NFT Storage API Key and Create NFT Storage Client
+    const NFT_STORAGE_API_KEY = hederaMainnetEnv ? process.env.REACT_APP_NFT_STORAGE_API_KEY_MAINNET : process.env.REACT_APP_NFT_STORAGE_API_KEY_TESTNET;
+    const nftStorageClient = new NFTStorage({ token: NFT_STORAGE_API_KEY });
+
+    // Sort file list from upload to match metadata JSON from Hashlips. 
+    // Updating order to [1.png, 2.png, etc]
+    const sortedHashLipsImagesArray = hashLipsImagesArray.sort((a, b) => (parseInt(a.name.split('.')[0]) > parseInt(b.name.split('.')[0])) ? 1 : -1)
+    
+    // // Crate Array for CIDs
+    let metaDataCIDs = [];
+    
+      hashlipsMetaData.forEach(async (data, index, array) => {
+        const metadata = await nftStorageClient.store({
+          ...data,
+          name: 'Test_'+ index,
+          image: new File([sortedHashLipsImagesArray[index]], `HGraph_Punks_${index}.jpg`, {
+            type: 'image/jpg',
+          })
+        })
+        metaDataCIDs.push(metadata.url);
+        if (metaDataCIDs.length -1 === array.length -1) resolve(metaDataCIDs)
+      });
+  });
+
+}
+
+export const uploadFile = async (event, token, setToken) => {
+  /* Only support gif /png /jpg for viewing */
+  const image = event?.target?.files[0]
+  const base64Image= await convertToBase64(image);
+  const imgType = () => {
+    switch(image.type) {
+      case 'image/png': 
+        return '.png'
+      case 'image/jpg':
+        return '.jpg'
+      case 'image/gif':
+        return '.gif'
+      default:
+        return null
+    }
+  }
+  setToken({
+      ...token,
+      imageData: base64Image,
+      imageType: imgType(),
+      photoSize: image.size,
+  })
+}
+
+export const uploadHashLipsFiles = async (token, setToken) => {
+  /* Only support gif /png /jpg for viewing */
+
+  const base64Image= await convertToBase64(image);
+  const imgType = () => {
+    switch(image.type) {
+      case 'image/png': 
+        return '.png'
+      case 'image/jpg':
+        return '.jpg'
+      case 'image/gif':
+        return '.gif'
+      default:
+        return null
+    }
+  }
+  
+}
+
+
+
+export const uploadJSON = async (event) => {
+  /* Only support gif /png /jpg for viewing */
+  const json = event?.target?.files[0];
+  console.log(json)
+
+  // const base64Image= await convertToBase64(image);
+  // const imgType = () => {
+  //   switch(image.type) {
+  //     case 'image/png': 
+  //       return '.png'
+  //     case 'image/jpg':
+  //       return '.jpg'
+  //     case 'image/gif':
+  //       return '.gif'
+  //     default:
+  //       return null
+  //   }
+  // }
+}
+
+export const convertToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = () => {
+      resolve(fileReader.result);
+    };
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+  });
+};

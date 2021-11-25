@@ -36,7 +36,7 @@ This was created with creat-react-app and npm.
 2. Rename the new file to .env
 3. Get [Node.js](https://nodejs.org/en/) installed on your device 
 4. Install all node modules `npm install`
-5. Start tool with `npm start`
+5. Start tool with `npm run electron:start`
 
 ## Donations
 

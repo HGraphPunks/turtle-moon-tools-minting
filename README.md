@@ -17,7 +17,10 @@ Please join the [Hedera NFT Creator Society](https://discord.gg/R4V2477Gqv) disc
 
 ## Getting Started
 
-You will need three accounts to create NFTs with TMT. 
+Tutorial Videos:
+https://www.youtube.com/channel/UCR2qFQxuia-sVzEZlAv9dzQ
+
+You will need three accounts to create NFTs with TMT.
 
 1. Hedera Portal Account:
 https://portal.hedera.com/

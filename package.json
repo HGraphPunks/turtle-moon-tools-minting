@@ -15,7 +15,7 @@
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@testing-library/user-event": "latest",
-    "@xact-wallet-sdk/client": "^1.0.1-alpha.0",
+    "@xact-wallet-sdk/client": "^2.0.1-alpha.0",
     "@xact-wallet-sdk/nft": "^1.0.14",
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",

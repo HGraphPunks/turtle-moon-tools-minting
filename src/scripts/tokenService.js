@@ -60,96 +60,29 @@ export const mintHashlips = async (hashlipsToken, hederaMainnetEnv) => {
   createNFTs(client, hashlipsToken, metadataCIDs, hederaMainnetEnv);
 }
 
-export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMainnetEnv) => {
-  // Init value for token ID to mint metadata
-  let tokenId; 
-
-  let adminKey;
-  let supplyKey;
-  let freezeKey;
-
-  // If minting on a token ID that's already created, skip creatining initial token
-  // if (!hashlipsToken.previousTokenId) {
-    /* Create a royalty fee */
-  const customRoyaltyFee = [];
-
-  const fee = new CustomRoyaltyFee()
-    .setNumerator(parseInt(hashlipsToken.royalty)) // The numerator of the fraction
-    .setDenominator(100) // The denominator of the fraction
-    .setFallbackFee(
-      new CustomFixedFee().setHbarAmount(new Hbar(5))
-    ) // The fallback fee
-    .setFeeCollectorAccountId(hashlipsToken.treasuryAccountId); // The account that will receive the royalty fee
-  customRoyaltyFee.push(fee);
-
-  adminKey = JSON.parse(localStorage.getItem('adminKey'))
-  if (!adminKey) { 
-      adminKey = PrivateKey.generate();
-      // localStorage.setItem('adminKey', JSON.stringify(adminKey))
-  }
-
-  supplyKey = JSON.parse(localStorage.getItem('supplyKey'))
-  if (!supplyKey) { 
-    supplyKey = PrivateKey.generate();
-    // localStorage.setItem('supplyKey', JSON.stringify(supplyKey))
-  } else {
-    // supplyKey = PrivateKey.generate(supplyKey)
-  }
-
-  freezeKey = JSON.parse(localStorage.getItem('freezeKey'))
-  if (!freezeKey) { 
-    freezeKey = PrivateKey.generate();
-      // localStorage.setItem('freezeKey', JSON.stringify(freezeKey))
-  }
-
-  const tx = await new TokenCreateTransaction()
-    .setTokenType(TokenType.NonFungibleUnique)
-    .setTokenName(hashlipsToken.name)
-    .setTokenSymbol(hashlipsToken.symbol)
-    // .setDecimals(0)
-    .setInitialSupply(0)
-    .setMaxSupply(hashlipsToken.maxSupply)
-    .setCustomFees(customRoyaltyFee)
-    .setSupplyType(TokenSupplyType.Finite)
-    .setTreasuryAccountId(hashlipsToken.treasuryAccountId)
-    .setAutoRenewAccountId(hashlipsToken.renewAccountId)
-    .setSupplyKey(supplyKey)
-    // .setAdminKey(adminKey)
-    // .setFreezeKey(freezeKey)
-
-  const transaction = await tx.signWithOperator(client);
-
-  /*  submit to the Hedera network */
-  const response = await transaction.execute(client);
-
-  /* Get the receipt of the transaction */
-  const receipt = await response.getReceipt(client);
-
-  /* Get the token ID from the receipt */
-  tokenId = receipt.tokenId;
-  // } else {
-  //   supplyKey = PrivateKey.generate();
-  //   tokenId = hashlipsToken.previousTokenId;
-  // }
-
-  console.log(tokenId);
+const mintExisitngToken = async (client, tokenId, metadataCIDs, hederaMainnetEnv) => {
+  // TODO: Make ths DRY
   /* Mint the token */
   let nftIds = [];
   let urls = [];
   let limit_chunk = 5;
-
+  let rawdata = localStorage.getItem('supplyKey'); //fs.readFileSync('./supplyKey.json');
+  let supplyKey = PrivateKey.fromString(rawdata);
+  debugger;
   const nbOfChunk = Math.ceil(metadataCIDs.length / limit_chunk);
   let supplyClone = metadataCIDs.length-1;
   let resp;
-  for (let i = 0; i < nbOfChunk; i++) {
-    const mintTransaction = new TokenMintTransaction().setTokenId(tokenId);
 
+  for (let i = 0; i < nbOfChunk; i++) {
+    debugger;
+    const mintTransaction = new TokenMintTransaction().setTokenId(tokenId);
     for (let j = 0; j < limit_chunk; j++) {
+      debugger;
       // const modifiedCID = metadataCIDs[j].split('ipfs://')[1];
       // const finalMetadataLink = `https://cloudflare-ipfs.com/ipfs/${modifiedCID}`;
 
-      if (supplyClone-j < 0) {
-        return
+      if ((supplyClone - j) < 0) {
+        break
       }
       mintTransaction.addMetadata(
         // Buffer.from(finalMetadataLink)
@@ -161,6 +94,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
  
     /* Sign with the supply private key of the token */
     const signTx = await mintTransaction
+      .setMaxTransactionFee(new Hbar(1000))
       .freezeWith(client)
       .sign(supplyKey);
 
@@ -184,7 +118,136 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
     mainnet: hederaMainnetEnv
   });
   console.log(mintData)
-  localStorage.setItem('hashlipsMintData_' + mintData?.tokenId , mintData)
+  localStorage.setItem('hashlipsMintData_' + tokenId.toString() , mintData)
+}
+
+export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMainnetEnv) => {
+  // Init value for token ID to mint metadata
+  let tokenId; 
+  let adminKey;
+  let supplyKey;
+  let freezeKey;
+
+  // If minting on a token ID that's already created, skip creatining initial token
+  if (hashlipsToken.previousTokenId) {
+    mintExisitngToken(client, hashlipsToken.previousTokenId, metadataCIDs, hederaMainnetEnv)
+    return
+  }
+    /* Create a royalty fee */
+  const customRoyaltyFee = [];
+
+  const fee = new CustomRoyaltyFee()
+    .setNumerator(parseInt(hashlipsToken.royalty)) // The numerator of the fraction
+    .setDenominator(100) // The denominator of the fraction
+    .setFallbackFee(
+      new CustomFixedFee().setHbarAmount(new Hbar(5))
+    ) // The fallback fee
+    .setFeeCollectorAccountId(hashlipsToken.treasuryAccountId); // The account that will receive the royalty fee
+  customRoyaltyFee.push(fee);
+
+  adminKey = PrivateKey.generate();
+
+  supplyKey = PrivateKey.generate();
+  
+  freezeKey = PrivateKey.generate();
+  debugger;
+  const tx = await new TokenCreateTransaction()
+    .setTokenType(TokenType.NonFungibleUnique)
+    .setTokenName(hashlipsToken.name)
+    .setTokenSymbol(hashlipsToken.symbol)
+    // .setDecimals(0)
+    .setInitialSupply(0)
+    .setMaxSupply(hashlipsToken.maxSupply)
+    .setCustomFees(customRoyaltyFee)
+    .setSupplyType(TokenSupplyType.Finite)
+    .setTreasuryAccountId(hashlipsToken.treasuryAccountId)
+    .setAutoRenewAccountId(hashlipsToken.renewAccountId)
+    .setSupplyKey(supplyKey)
+    .setMaxTransactionFee(new Hbar(1000))
+    // .setAdminKey(adminKey)
+    // .setFreezeKey(freezeKey)
+
+  const transaction = await tx.signWithOperator(client);
+
+  /*  submit to the Hedera network */
+  const response = await transaction.execute(client);
+
+  /* Get the receipt of the transaction */
+  const receipt = await response.getReceipt(client);
+
+  /* Get the token ID from the receipt */
+  tokenId = receipt.tokenId;
+  // } else {
+  //   supplyKey = PrivateKey.generate();
+  //   tokenId = hashlipsToken.previousTokenId;
+  // }
+
+  console.log(tokenId);
+
+  /* Mint the token */
+  let nftIds = [];
+  let urls = [];
+  let limit_chunk = 5;
+
+  const nbOfChunk = Math.ceil(metadataCIDs.length / limit_chunk);
+  let supplyClone = metadataCIDs.length-1;
+  let resp;
+
+  for (let i = 0; i < nbOfChunk; i++) {
+    debugger;
+    const mintTransaction = new TokenMintTransaction().setTokenId(tokenId);
+    for (let j = 0; j < limit_chunk; j++) {
+      debugger;
+      // const modifiedCID = metadataCIDs[j].split('ipfs://')[1];
+      // const finalMetadataLink = `https://cloudflare-ipfs.com/ipfs/${modifiedCID}`;
+
+      if ((supplyClone - j) < 0) {
+        break
+      }
+      mintTransaction.addMetadata(
+        // Buffer.from(finalMetadataLink)
+        Buffer.from(metadataCIDs[supplyClone-j])
+      );
+      urls.push(metadataCIDs[supplyClone-j])
+    }
+    supplyClone = supplyClone - limit_chunk;
+ 
+    /* Sign with the supply private key of the token */
+    const signTx = await mintTransaction
+      .setMaxTransactionFee(new Hbar(1000))
+      .freezeWith(client)
+      .sign(supplyKey);
+
+    /* Submit the transaction to a Hedera network */
+    resp = await signTx.execute(client);
+    const receiptMint = await resp.getReceipt(client);
+    /* Get the Serial Number */
+    const serialNumber = receiptMint.serials;
+
+    /* Get the NftId */
+    for (const nftSerial of serialNumber.values()) {
+      nftIds.push(new NftId(tokenId, nftSerial).toString());
+    }
+  }
+
+  const mintData = JSON.stringify({
+    urls: urls,
+    txId: resp.transactionId.toString(),
+    tokenId: tokenId.toString(),
+    nftIds,
+    mainnet: hederaMainnetEnv
+  });
+
+
+  let saveSupplyKey = supplyKey.toString()
+  fs.appendFile(`../supplyKey.json`, saveSupplyKey, (err) => {
+    if (err) throw err;
+    console.log('supply key written to file');
+  });
+  
+  localStorage.setItem('supplyKey', saveSupplyKey)
+  console.log(mintData)
+  localStorage.setItem('hashlipsMintData_' + tokenId.toString() , mintData)
 }
 
 /* TODO: Create method for mass uploading of NFTs from Hashlips */
@@ -266,14 +329,22 @@ export const sellNFT = async (NFTForSale, xactClient) => {
   if (xactClient == null) {
     throw new Error("Xact connection must be present");
   }  
-      
+      debugger;
   /* Update strings to integers for endpoint */
   const obj = NFTForSale;
   obj.hbarAmount = parseInt(obj.hbarAmount);
   obj.quantity = parseInt(obj.quantity);
-
-  const saleResponse = await xactClient.sellNFT(obj);
-  console.log(saleResponse)
+  obj.nftIds = NFTForSale.nftIds.split(',');
+  console.log(obj)
+  if (NFTForSale.quantity) {
+    delete obj.nftIds
+    const saleResponse = await xactClient.sellNFT(obj);
+    console.log(saleResponse)
+  } else {
+    delete obj.quantity
+    const saleResponse = await xactClient.sellNFT(obj);
+    console.log(saleResponse)
+  }
 
   /* Subscribe to new sale NFT Validation */
   xactClient.sellNFTValidation().subscribe(nft => {
@@ -284,6 +355,10 @@ export const sellNFT = async (NFTForSale, xactClient) => {
   console.log('sellNFT Call Success')
 }
 
+export const refreshAccount = async () => {
+  const user =  await this.client.refreshAccount({ accountId: "0.0.1960117"})
+  console.log(user)
+}
 
 export const removeNFTFromSale = async (tokenId, xactPrivateKey) => {
     const apiKey = xactPrivateKey;
@@ -306,9 +381,9 @@ export const removeNFTFromSale = async (tokenId, xactPrivateKey) => {
     });
 }
 
-export const getNFTQRCode = async (tokenIDQR, xactClient, hederaMainnetEnv) => {
+export const getNFTQRCode = async (saleQRCode, xactClient, hederaMainnetEnv) => {
 
-  const res = await xactClient.getNFTForSaleByTokenId({tokenId: tokenIDQR});
+  const res = await xactClient.getNFTForSaleByTokenId({tokenId: saleQRCode.tokenId, nftId: `${saleQRCode.nftIdNum}@${saleQRCode.tokenId}`});
   
   // TODO: Create local storage function for all objects to use.
   const tmt_qrcodes = localStorage.getItem('tmt_qrcodes') ? JSON.parse(localStorage.getItem('tmt_qrcodes')) : [];
@@ -316,6 +391,7 @@ export const getNFTQRCode = async (tokenIDQR, xactClient, hederaMainnetEnv) => {
     nft: res?.nft,
     qrCode: res?.qrCode,
     tokenId: res?.nft?.tokenId,
+    nftId: res?.nft?.nftId,
     mainnet: hederaMainnetEnv
   }); 
   localStorage.setItem('tmt_qrcodes', JSON.stringify(tmt_qrcodes));

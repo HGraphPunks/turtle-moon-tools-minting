@@ -1,4 +1,5 @@
-import {Client} from '@xact-wallet-sdk/client'
+import {Client, 
+  DebugLevel,} from '@xact-wallet-sdk/client'
 
 export const generateLogin = async (hederaMainnetEnv, setQrData, setUser, setLoginOpen) => {
   //get your api key from your .env file
@@ -8,14 +9,14 @@ export const generateLogin = async (hederaMainnetEnv, setQrData, setUser, setLog
       throw new Error("Environment variables API_KEY must be present");
   }
   /* Create a new instance of Client */
-  const client = new Client({apiKey});
+  // testnet beta creds, remove options for prod
+  const client = new Client({apiKey: apiKey})
   
   /* Init the connection */
   await client.initConnexion();
   
   /* Generate a QR Code */
   const qrCode = await client.generateQRCode();
-
   /* Subscribe to new Connections */
   client.connect().subscribe(user => {
     console.log('new connexion', JSON.stringify(user));

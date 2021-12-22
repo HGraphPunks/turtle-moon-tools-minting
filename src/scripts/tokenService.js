@@ -335,7 +335,8 @@ export const sellNFT = async (NFTForSale, xactClient) => {
   obj.hbarAmount = parseInt(obj.hbarAmount);
   obj.quantity = parseInt(obj.quantity);
   obj.nftIds = NFTForSale.nftIds.split(',');
-  console.log(obj)
+  obj.isCollection = false;
+  debugger
   if (NFTForSale.quantity) {
     delete obj.nftIds
     const saleResponse = await xactClient.sellNFT(obj);

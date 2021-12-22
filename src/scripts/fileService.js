@@ -22,18 +22,16 @@ export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, heder
     
     // // Crate Array for CIDs
     let metaDataCIDs = [];
-    
-      hashlipsMetaData.forEach(async (data, index, array) => {
+      for (let index = 0; index < hashlipsMetaData.length; index++) {
         const metadata = await nftStorageClient.store({
-          ...data,
-          name: 'Test_'+ index,
-          image: new File([sortedHashLipsImagesArray[index]], `HGraph_Punks_${index}.jpg`, {
+          ...hashlipsMetaData[index],
+          image: new File([sortedHashLipsImagesArray[index]], `HGP_${index}.jpg`, {
             type: 'image/jpg',
           })
         })
         metaDataCIDs.push(metadata.url);
-        if (metaDataCIDs.length -1 === array.length -1) resolve(metaDataCIDs)
-      });
+        if (metaDataCIDs.length -1 === hashlipsMetaData.length -1) resolve(metaDataCIDs)
+      }
   });
 
 }

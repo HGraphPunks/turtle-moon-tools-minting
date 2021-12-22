@@ -60,6 +60,7 @@ export const Dashboard = () => {
     const hederaMainnetEnv = context?.hederaMainnetEnv
     const setLoading = context?.setLoading
     const xactClient = context?.xactClient
+   
 
     /* Init Tokeen State */
     const [token, setToken] = useState(
@@ -83,8 +84,9 @@ export const Dashboard = () => {
       {
         fromAccountId: accountId,
         hbarAmount: '',
-        quantity: '',
         tokenId: '',
+        nftIds: '',
+        quantity:''
       }
     );
 
@@ -102,7 +104,10 @@ export const Dashboard = () => {
     );
 
     const [tokenIdInfo, setTokenIdInfo] = useState('');
-    const [tokenIDQR, setTokenIdQR] = useState('');
+    const [saleQRCode, setSaleQRCode] = useState({
+      tokenId: '',
+      nftIdNum: ''
+    });
 
     const [alreadyMintedToken, setAlreadyMintedToken] = useState(false);
     const handleAMTChange = (event) => {
@@ -301,23 +306,7 @@ export const Dashboard = () => {
                     Get Token Info
                 </Button>
             </TabPanel>
-            <TabPanel value="4">
-              <Paper>
-                  <TextField          
-                    placeholder={"Token ID"}
-                    value={tokenIDQR}
-                    onInput={ e=>setTokenIdQR(e.target.value)}
-                  /> 
-                  <br/>
-                  <Button
-                    variant="contained"
-                    component="label"
-                    onClick={() => {associateToken(xactPrivateKey)}}
-                  >
-                    Associate Token
-                  </Button>
-              </Paper>
-            </TabPanel>
+           
             <TabPanel value="5">
               <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 1, md: 3 }}>
                 <h1>APLHA: THIS FUCNTION IS UNSTABLE, MIGHT NOT WORK</h1>
@@ -334,9 +323,18 @@ export const Dashboard = () => {
                     <Grid item xs={12}>
                       <TextField          
                         style={{width:'100%'}}
+                        placeholder={"Quantitiy"}
+                        value={NFTForSale.quantity}
+                        onInput={ e=>setNFTForSale({...NFTForSale, quantity: e.target.value})}
+                      /> 
+                    </Grid>
+                    <br/>
+                    <Grid item xs={12}>
+                      <TextField          
+                        style={{width:'100%'}}
                         placeholder={"NFT ID"}
-                        value={NFTForSale.nftId}
-                        onInput={ e=>setNFTForSale({...NFTForSale, nftId: e.target.value})}
+                        value={NFTForSale.nftIds}
+                        onInput={ e=>setNFTForSale({...NFTForSale, nftIds: e.target.value})}
                       /> 
                     </Grid>
                     <br/>
@@ -358,7 +356,7 @@ export const Dashboard = () => {
                         onInput={ e=>setNFTForSale({...NFTForSale, hbarAmount: e.target.value})}
                       /> 
                     </Grid>
-                    <br/>
+                    {/* <br/>
                     <Grid item xs={12}>
                       <TextField          
                         style={{width:'100%'}} 
@@ -368,7 +366,7 @@ export const Dashboard = () => {
                         onInput={ e=>setNFTForSale({...NFTForSale, quantity: e.target.value})}
                       /> 
                     </Grid>
-                    <br/>
+                    <br/> */}
                     <Grid item xs={12}>
                       <Button
                         style={{float:"left", width:"100%", margin: "15px 0"}}
@@ -387,15 +385,22 @@ export const Dashboard = () => {
                       <TextField
                           style={{float:"right", width:'70%'}}           
                           placeholder={"Token ID"}
-                          value={tokenIDQR}
-                          onInput={ e=>setTokenIdQR(e.target.value)}
+                          value={saleQRCode.tokenId}
+                          onInput={ e=>setSaleQRCode({...saleQRCode, tokenId: e.target.value})}
+                      /> 
+                      <br/>
+                      <TextField
+                          style={{float:"right", width:'70%'}}           
+                          placeholder={"NFT ID #"}
+                          value={saleQRCode.nftIdNum}
+                          onInput={ e=>setSaleQRCode({...saleQRCode, nftIdNum: e.target.value})}
                       /> 
                       <br/>
                       <Button
                           variant="contained"
                           style={{float:"right", width:"70%", margin: "15px 0"}}
                           component="label"
-                          onClick={() => {getNFTQRCode(tokenIDQR, xactClient, hederaMainnetEnv)}}
+                          onClick={() => {getNFTQRCode(saleQRCode, xactClient, hederaMainnetEnv)}}
                       >
                         Create QR Code
                       </Button>
@@ -443,7 +448,6 @@ export const Dashboard = () => {
                     <Checkbox
                       checked={alreadyMintedToken}
                       onChange={handleAMTChange}
-                      disabled={true}
                       inputProps={{ 'aria-label': 'controlled' }}
                     /> I am minting more on a tokenID already created
                     <br />

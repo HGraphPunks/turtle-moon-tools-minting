@@ -16,8 +16,8 @@ export const checkProvided = (environmentVariable) => {
 }
 
 export const hederaClient = (hederaMainnetEnv) => {
-  const operatorAccount = process.env.REACT_APP_MY_ACCOUNT_ID; 
-  const operatorPrivateKey = process.env.REACT_APP_MY_PRIVATE_KEY;
+  const operatorAccount = hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET; 
+  const operatorPrivateKey = hederaMainnetEnv ? process.env.REACT_APP_MY_PRIVATE_KEY_MAINNET : process.env.REACT_APP_MY_PRIVATE_KEY_TESTNET;
 
   console.log(hederaMainnetEnv);
   console.log(operatorPrivateKey);

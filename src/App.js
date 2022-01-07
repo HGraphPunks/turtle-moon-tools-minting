@@ -53,45 +53,16 @@ export default function App() {
     setEnv(event.target.checked);
   };
 
-  const disconnectUser = () => {
-    localStorage.removeItem('tmt-user');
-    setLoginOpen(true);
-    
-    // TODO: Fix to better practice, don't intro null to bool
-    setEnv(null)
-  };
-
   /* When ENV Toggle is hit, Update application */
   useEffect(async () => {
     setUser(false)
     // Clear QR code data to display loading icon
     setQrData('')
     // set env to testnet by default
-    
-    // get user from local storage
-    const savedUser = JSON.parse(localStorage.getItem('tmt-user'));
-    console.log(savedUser)
-    if (savedUser) {
-      const apiKey = savedUser.environment === 'testnet' ? process.env.REACT_APP_XACT_PRIVATE_KEY_TESTNET : process.env.REACT_APP_XACT_PRIVATE_KEY_MAINNET;
-      // Create Client
-      // const client = new Client({apiKey});
-      const client = {};
-
-      //await client.initConnexion();
-      console.log(savedUser.environment)
-      setXactClient(client)
-      setUser(savedUser)
-      setLoginOpen(false)
-      setEnv(savedUser.environment === 'mainnet')
-    } else {
-      console.log('generate login')
-      const client = {};
-      // Make connection to generate QR code from Xact
-      //const client = await generateLogin(hederaMainnetEnv, setQrData, setUser, setLoginOpen)
-      setXactClient(client)
-      setLoginOpen(false)
-    }
-    console.log(hederaMainnetEnv)
+  
+    const client = {};
+    setXactClient(client)
+    setLoginOpen(false)
 
   },[hederaMainnetEnv])
 
@@ -140,6 +111,20 @@ export default function App() {
           &nbsp;
           &nbsp;
           &nbsp;
+          <div style={{display:'flex', maringBottom: '25px', alignItems: 'center', justifyContent: 'center'}}>
+                  <FormGroup>
+                  <FormControlLabel
+                      label={hederaMainnetEnv ? 'Mainnet' : 'Testnet'}
+                      control={
+                        <Switch
+                          checked={hederaMainnetEnv}
+                          onChange={changeEnv}
+                          aria-label="env switch"
+                        />
+                      }
+                    />
+                  </FormGroup>
+                </div>
           {/* <Button variant="contained" onClick={disconnectUser}>
             Disconect {user.accountId}
           </Button> */}
@@ -153,7 +138,7 @@ export default function App() {
                 <Typography style={{textAlign:'center'}} id="modal-modal-title" variant="h6" component="h2">
                   Donate to 🐢🌕🛠️
                 </Typography>
-                { !hederaMainnetEnv ?
+                { true ?
                   <Typography style={{textAlign:'center'}} sx={{ mt: 2 }}>
                     We appreicate your support!<br /><br />You can send HBAR to this address<br /> <span style={{fontSize:"25px"}}>0.0.591814</span><br />
                   <br />   

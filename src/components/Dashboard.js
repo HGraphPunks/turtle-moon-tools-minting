@@ -99,8 +99,8 @@ export const Dashboard = () => {
         numOfRoyaltyFees: 1,
         royalty0: '',
         royaltyAccountId0: '',
-        treasuryAccountId: process.env.REACT_APP_MY_ACCOUNT_ID,
-        renewAccountId: process.env.REACT_APP_MY_ACCOUNT_ID,
+        treasuryAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
+        renewAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
         previousTokenId: ''
       }
     );
@@ -531,7 +531,6 @@ export const Dashboard = () => {
                         placeholder={"Treasury Account ID"}
                         label={"Treasury Account ID"}
                         value={hashlipsToken.treasuryAccountId}
-                        disabled={true}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, treasuryAccountId: e.target.value})}
                     /> 
                     <br />
@@ -541,7 +540,6 @@ export const Dashboard = () => {
                         placeholder={"Auto Renew"}
                         label={"Auto Renew Account ID"}
                         value={hashlipsToken.renewAccountId}
-                        disabled={true}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, renewAccountId: e.target.value})}
                     /> 
                     <br />

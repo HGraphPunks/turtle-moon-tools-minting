@@ -215,16 +215,17 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
     nftIds,
     mainnet: hederaMainnetEnv
   });
+  console.log(mintData)
 
 
   let saveSupplyKey = supplyKey.toString()
-  fs.appendFile(`../supplyKey.json`, saveSupplyKey, (err) => {
-    if (err) throw err;
-    console.log('supply key written to file');
-  });
+  // fs.appendFile(`../supplyKey.json`, saveSupplyKey, (err) => {
+  //   if (err) throw err;
+  //   console.log('supply key written to file');
+  // });
   
-  localStorage.setItem('supplyKey', saveSupplyKey)
-  console.log(mintData)
+  localStorage.setItem('supplyKey_'+tokenId.toString(), saveSupplyKey)
+  console.log(saveSupplyKey)
   localStorage.setItem('hashlipsMintData_' + tokenId.toString() , mintData)
 }
 

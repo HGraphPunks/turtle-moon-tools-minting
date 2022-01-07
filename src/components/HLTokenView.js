@@ -19,8 +19,13 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 
 export const HLTokenView = () => {
-  const hashlipsMintData = localStorage.getItem('hashlipsMintData') || JSON.stringify([]);
-  const logs = JSON.parse(hashlipsMintData);
+  let hashlipsMintLocalData = []
+  for (var a in localStorage) {
+    if (a.indexOf('hashlipsMintData') !== -1) {
+      hashlipsMintLocalData.push(JSON.parse(localStorage[a]));
+    }
+  }
+  const logs = hashlipsMintLocalData;
   const [expanded, setExpanded] = useState(false);
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -58,30 +63,26 @@ export const HLTokenView = () => {
                   <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell align="right">Token Id</TableCell>
-                        <TableCell align="right">Schema</TableCell>
-                        <TableCell align="right">Creator</TableCell>
-                        <TableCell align="right">Description</TableCell>
-                        <TableCell align="right">Category</TableCell>
-                        <TableCell align="right">Royalty</TableCell>
+                        <TableCell>Metadata</TableCell>
+                        <TableCell align="right">NFT Id</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                        <TableRow
-                          key={log?.tokenJSON?.name}
-                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {log?.tokenJSON?.name}
-                          </TableCell>
-                          <TableCell align="right">{log?.nft?.tokenId}</TableCell>
-                          <TableCell align="right"><Link onClick={()=> {openBlank(log?.nft?.url)}}>IPFS</Link></TableCell>
-                          <TableCell align="right">{log?.tokenJSON?.creator}</TableCell>
-                          <TableCell align="right">{log?.tokenJSON?.description?.description}</TableCell>
-                          <TableCell align="right">{log?.tokenJSON?.category}</TableCell>
-                          <TableCell align="right">{log?.tokenJSON?.royalties?.numerator}%</TableCell>
-                        </TableRow>
+                      {log.urls.map((url, urlIndex) => {
+                        return <TableRow
+                                key={index}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                              >
+                            <TableCell component="th" scope="row">
+                              <Link onClick={()=> {openBlank(url)}}>IPFS</Link>
+                            </TableCell>
+                            <TableCell align="right">
+                              {log?.nftIds[urlIndex]}
+                            </TableCell>
+                          </TableRow>
+                        })
+                      }
+                        
                     </TableBody>
                   </Table>
                 </TableContainer>

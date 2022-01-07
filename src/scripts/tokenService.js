@@ -135,15 +135,19 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
   }
     /* Create a royalty fee */
   const customRoyaltyFee = [];
-
-  const fee = new CustomRoyaltyFee()
-    .setNumerator(parseInt(hashlipsToken.royalty)) // The numerator of the fraction
-    .setDenominator(100) // The denominator of the fraction
-    .setFallbackFee(
-      new CustomFixedFee().setHbarAmount(new Hbar(5))
-    ) // The fallback fee
-    .setFeeCollectorAccountId(hashlipsToken.treasuryAccountId); // The account that will receive the royalty fee
-  customRoyaltyFee.push(fee);
+  for (let index = 0; index < parseInt(hashlipsToken.numOfRoyaltyFees); index++) {
+    let numerator = parseFloat(hashlipsToken['royalty'+index]) *100;
+    const fee = new CustomRoyaltyFee()
+    .setNumerator(numerator) // The numerator of the fraction
+    .setDenominator(10000) // The denominator of the fraction
+    // .setFallbackFee(
+    //   new CustomFixedFee().setHbarAmount(new Hbar(5))
+    // ) // The fallback fee
+    .setFeeCollectorAccountId(hashlipsToken['royaltyAccountId'+index]); // The account that will receive the royalty fee
+    customRoyaltyFee.push(fee);
+    debugger
+  }
+  
 
   adminKey = PrivateKey.generate();
 
@@ -164,16 +168,18 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
     .setAutoRenewAccountId(hashlipsToken.renewAccountId)
     .setSupplyKey(supplyKey)
     .setMaxTransactionFee(new Hbar(1000))
+    .freezeWith(client);
     // .setAdminKey(adminKey)
     // .setFreezeKey(freezeKey)
 
-  const transaction = await tx.signWithOperator(client);
+  // const transaction = await tx.signWithOperator(client);
+  const transaction = await tx.sign(PrivateKey.fromString(process.env.REACT_APP_MY_PRIVATE_KEY));
 
   /*  submit to the Hedera network */
   const response = await transaction.execute(client);
 
   /* Get the receipt of the transaction */
-  const receipt = await response.getReceipt(client);
+  const receipt = await response.getReceipt(client).catch((e) => console.log(e));
 
   /* Get the token ID from the receipt */
   tokenId = receipt.tokenId;

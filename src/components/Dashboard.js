@@ -99,8 +99,8 @@ export const Dashboard = () => {
         numOfRoyaltyFees: 1,
         royalty0: '',
         royaltyAccountId0: '',
-        treasuryAccountId: '',
-        renewAccountId: '',
+        treasuryAccountId: process.env.REACT_APP_MY_ACCOUNT_ID,
+        renewAccountId: process.env.REACT_APP_MY_ACCOUNT_ID,
         previousTokenId: ''
       }
     );
@@ -157,6 +157,7 @@ export const Dashboard = () => {
             style={{width:'100%'}}
             type="number"
             placeholder={"Royalty % "+index}
+            label={"Royalty % "+index}
             value={hashlipsToken['royalty'+index] }
             disabled={alreadyMintedToken}
             onInput={ e=>setHashlipsToken({...hashlipsToken, ['royalty'+index]: e.target.value})}
@@ -167,6 +168,7 @@ export const Dashboard = () => {
             style={{width:'100%'}}
             type="text"
             placeholder={"Royalty Account ID"+index}
+            label={"Royalty Account ID"+index}
             value={hashlipsToken['royaltyAccountId'+index]}
             disabled={alreadyMintedToken}
             onInput={ e=>setHashlipsToken({...hashlipsToken, ['royaltyAccountId'+index]: e.target.value})}
@@ -468,6 +470,7 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Previous Token Id"}
+                        label={"Previous Token Id"}
                         value={hashlipsToken.previousTokenId}
                         disabled={!alreadyMintedToken}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, previousTokenId: e.target.value})}
@@ -483,6 +486,7 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Token Name"}
+                        label={"Token Name"}
                         value={hashlipsToken.name}
                         disabled={alreadyMintedToken}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, name: e.target.value})}
@@ -492,6 +496,7 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Token Symbol"}
+                        label={"Token Symbol"}
                         value={hashlipsToken.symbol}
                         disabled={alreadyMintedToken}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, symbol: e.target.value})}
@@ -501,6 +506,7 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Max Supply"}
+                        label={"Max Supply"}
                         type="number"
                         value={hashlipsToken.maxSupply}
                         disabled={alreadyMintedToken}
@@ -512,6 +518,7 @@ export const Dashboard = () => {
                         style={{width:'100%'}}
                         type="number"
                         placeholder={"Number of Royalty Accounts"}
+                        label={"Number of Royalty Accounts"}
                         value={hashlipsToken.numOfRoyaltyFees}
                         disabled={alreadyMintedToken}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, numOfRoyaltyFees: e.target.value})}
@@ -522,8 +529,9 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Treasury Account ID"}
+                        label={"Treasury Account ID"}
                         value={hashlipsToken.treasuryAccountId}
-                        disabled={alreadyMintedToken}
+                        disabled={true}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, treasuryAccountId: e.target.value})}
                     /> 
                     <br />
@@ -531,8 +539,9 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Auto Renew"}
+                        label={"Auto Renew Account ID"}
                         value={hashlipsToken.renewAccountId}
-                        disabled={alreadyMintedToken}
+                        disabled={true}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, renewAccountId: e.target.value})}
                     /> 
                     <br />

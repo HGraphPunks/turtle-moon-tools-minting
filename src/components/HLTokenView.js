@@ -70,7 +70,7 @@ export const HLTokenView = () => {
                     <TableBody>
                       {log.urls.map((url, urlIndex) => {
                         return <TableRow
-                                key={index}
+                                key={index+'_'+urlIndex}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                               >
                             <TableCell component="th" scope="row">

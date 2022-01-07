@@ -25,7 +25,7 @@ export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, heder
       for (let index = 0; index < hashlipsMetaData.length; index++) {
         const metadata = await nftStorageClient.store({
           ...hashlipsMetaData[index],
-          image: new File([sortedHashLipsImagesArray[index]], `HGP_${index}.jpg`, {
+          image: new File([sortedHashLipsImagesArray[index]], `genart_${index}.jpg`, {
             type: 'image/jpg',
           })
         })

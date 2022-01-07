@@ -41,11 +41,11 @@ export default function App() {
   const [hederaMainnetEnv, setEnv] = React.useState(false);
   const [amount, setDonationAmount] = React.useState(50);
   const [donationOpen, setDonationOpen] = React.useState(false);
-  const [loginOpen, setLoginOpen] = React.useState(true);
+  const [loginOpen, setLoginOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [xactClient, setXactClient] = React.useState({});
   const [qrData, setQrData] = React.useState('');
-  const [user, setUser] = React.useState(false);
+  const [user, setUser] = React.useState(true);
   const handleDonationOpen = () => setDonationOpen(true);
   const handleDonationClose = () => setDonationOpen(false);
 
@@ -74,8 +74,10 @@ export default function App() {
     if (savedUser) {
       const apiKey = savedUser.environment === 'testnet' ? process.env.REACT_APP_XACT_PRIVATE_KEY_TESTNET : process.env.REACT_APP_XACT_PRIVATE_KEY_MAINNET;
       // Create Client
-      const client = new Client({apiKey});
-      await client.initConnexion();
+      // const client = new Client({apiKey});
+      const client = {};
+
+      //await client.initConnexion();
       console.log(savedUser.environment)
       setXactClient(client)
       setUser(savedUser)
@@ -83,10 +85,11 @@ export default function App() {
       setEnv(savedUser.environment === 'mainnet')
     } else {
       console.log('generate login')
+      const client = {};
       // Make connection to generate QR code from Xact
-      const client = await generateLogin(hederaMainnetEnv, setQrData, setUser, setLoginOpen)
+      //const client = await generateLogin(hederaMainnetEnv, setQrData, setUser, setLoginOpen)
       setXactClient(client)
-      setLoginOpen(true)
+      setLoginOpen(false)
     }
     console.log(hederaMainnetEnv)
 
@@ -128,7 +131,7 @@ export default function App() {
           &nbsp;
           &nbsp;
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} style={{color: 'grey'}}>
-            Alpha (v0.0.7) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
+            Alpha (v0.0.8) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
           </Typography> 
           <Button onClick={handleDonationOpen}>
             Donate
@@ -137,9 +140,9 @@ export default function App() {
           &nbsp;
           &nbsp;
           &nbsp;
-          <Button variant="contained" onClick={disconnectUser}>
+          {/* <Button variant="contained" onClick={disconnectUser}>
             Disconect {user.accountId}
-          </Button>
+          </Button> */}
           <Modal
               open={donationOpen}
               onClose={handleDonationClose}
@@ -242,7 +245,7 @@ export default function App() {
       </AppBar>
       <Container maxWidth="lg">    
         <CssBaseline />
-        {user ? <Dashboard /> : ''}
+        <Dashboard /> 
         <Copyright />
       </Container>
       </TMTProvider>

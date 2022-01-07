@@ -39,14 +39,14 @@ import {
 } from '../scripts/tokenService'
 
 import {TokenView} from './TokenView'        
-import {QRView} from './QRView'        
+import {HLTokenView} from './HLTokenView'        
 import {uploadFile} from '../scripts/fileService'
 import TMTContext from '../context/tmt-context'
 
 
 export const Dashboard = () => {
     /* Create State for Tabs */
-    const [tab, setTab] = useState('1');
+    const [tab, setTab] = useState('7');
 
     /* Set Account ID Based on ENV */
     /* ONLY USE IF BYPASSING QR CODE LOGIN */
@@ -96,9 +96,11 @@ export const Dashboard = () => {
         name: '',
         symbol: '',
         maxSupply: '',
-        royalty: '',
-        treasuryAccountId: accountId,
-        renewAccountId: accountId,
+        numOfRoyaltyFees: 1,
+        royalty0: '',
+        royaltyAccountId0: '',
+        treasuryAccountId: process.env.REACT_APP_MY_ACCOUNT_ID,
+        renewAccountId: process.env.REACT_APP_MY_ACCOUNT_ID,
         previousTokenId: ''
       }
     );
@@ -147,17 +149,45 @@ export const Dashboard = () => {
       }
       dlAnchorElem.click();
     }
+    const royaltyFields = []
+    for (let index = 0; index < hashlipsToken.numOfRoyaltyFees; index++) {
+      royaltyFields.push(
+      <>
+        <TextField          
+            style={{width:'100%'}}
+            type="number"
+            placeholder={"Royalty % "+index}
+            label={"Royalty % "+index}
+            value={hashlipsToken['royalty'+index] }
+            disabled={alreadyMintedToken}
+            onInput={ e=>setHashlipsToken({...hashlipsToken, ['royalty'+index]: e.target.value})}
+        /> 
+        <br />
+        <br />
+        <TextField          
+            style={{width:'100%'}}
+            type="text"
+            placeholder={"Royalty Account ID"+index}
+            label={"Royalty Account ID"+index}
+            value={hashlipsToken['royaltyAccountId'+index]}
+            disabled={alreadyMintedToken}
+            onInput={ e=>setHashlipsToken({...hashlipsToken, ['royaltyAccountId'+index]: e.target.value})}
+        /> 
+        
+        <br />
+        <br />
+      </>)
+    }
 
-    
     return( 
       <div>
         <Box md={{ width: '100%', typography: 'body1' }}>
           <TabContext value={tab}>
             <Box lg={{ borderBottom: 1, borderColor: 'divider' }}>
               <TabList variant="fullWidth" onChange={handleTabSelection} aria-label="lab API tabs example">
-                <Tab label="Create Token" value="1" />
+                {/* <Tab label="Create Token" value="1" />
                 <Tab label="Sell NFT" value="5" />
-                <Tab label="Remove Sale" value="6" />
+                <Tab label="Remove Sale" value="6" /> */}
                 <Tab label="Hashlips Minting" value="7" />
               </TabList>
             </Box>
@@ -440,6 +470,7 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Previous Token Id"}
+                        label={"Previous Token Id"}
                         value={hashlipsToken.previousTokenId}
                         disabled={!alreadyMintedToken}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, previousTokenId: e.target.value})}
@@ -451,11 +482,11 @@ export const Dashboard = () => {
                       inputProps={{ 'aria-label': 'controlled' }}
                     /> I am minting more on a tokenID already created
                     <br />
-                    <p>Disabled: Functionality coming soon ^</p>
                     <br />
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Token Name"}
+                        label={"Token Name"}
                         value={hashlipsToken.name}
                         disabled={alreadyMintedToken}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, name: e.target.value})}
@@ -465,6 +496,7 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Token Symbol"}
+                        label={"Token Symbol"}
                         value={hashlipsToken.symbol}
                         disabled={alreadyMintedToken}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, symbol: e.target.value})}
@@ -474,6 +506,7 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Max Supply"}
+                        label={"Max Supply"}
                         type="number"
                         value={hashlipsToken.maxSupply}
                         disabled={alreadyMintedToken}
@@ -484,18 +517,21 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         type="number"
-                        placeholder={"Royalty %"}
-                        value={hashlipsToken.royalty}
+                        placeholder={"Number of Royalty Accounts"}
+                        label={"Number of Royalty Accounts"}
+                        value={hashlipsToken.numOfRoyaltyFees}
                         disabled={alreadyMintedToken}
-                        onInput={ e=>setHashlipsToken({...hashlipsToken, royalty: e.target.value})}
+                        onInput={ e=>setHashlipsToken({...hashlipsToken, numOfRoyaltyFees: e.target.value})}
                     /> 
                     <br />
                     <br />
+                    {royaltyFields}
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Treasury Account ID"}
+                        label={"Treasury Account ID"}
                         value={hashlipsToken.treasuryAccountId}
-                        disabled={alreadyMintedToken}
+                        disabled={true}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, treasuryAccountId: e.target.value})}
                     /> 
                     <br />
@@ -503,8 +539,9 @@ export const Dashboard = () => {
                     <TextField          
                         style={{width:'100%'}}
                         placeholder={"Auto Renew"}
+                        label={"Auto Renew Account ID"}
                         value={hashlipsToken.renewAccountId}
-                        disabled={alreadyMintedToken}
+                        disabled={true}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, renewAccountId: e.target.value})}
                     /> 
                     <br />
@@ -528,7 +565,7 @@ export const Dashboard = () => {
                   <br/>
                   <br/>
                   <Button
-                        style={{width:'50%'}}
+                      style={{width:'50%'}}
                       variant="contained"
                       component="label"
                       onClick={() => {mintHashlips(hashlipsToken, hederaMainnetEnv)}}
@@ -542,7 +579,6 @@ export const Dashboard = () => {
         </Box>
         <br />
         <Box>
-          {tab === "5" ?  <QRView /> : <></> }
           <a id="downloadAnchorElem" style={{display:"none"}}></a>
             <>
               <Button
@@ -561,7 +597,7 @@ export const Dashboard = () => {
               >
                 Download Logs
               </Button>
-              <TokenView /> 
+              <HLTokenView /> 
             </>
         </Box>
       </div>

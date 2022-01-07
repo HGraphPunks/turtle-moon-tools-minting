@@ -101,6 +101,7 @@ export const Dashboard = () => {
         royaltyAccountId0: '',
         treasuryAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
         renewAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
+        fallbackFee: 5,
         previousTokenId: ''
       }
     );
@@ -287,12 +288,13 @@ export const Dashboard = () => {
                           placeholder={"Category"}
                           onChange={e=>setToken({...token, category: e.target.value})}
                         >
-                        <MenuItem value={CategoryNFT.COLLECTIBLE}>Collectible</MenuItem>
-                        <MenuItem value={CategoryNFT.ART}>Art</MenuItem>
-                        <MenuItem value={CategoryNFT.DIGITAL_ART}>Digital art</MenuItem>
-                        <MenuItem value={CategoryNFT.DOCUMENT}>Document</MenuItem>
-                        <MenuItem value={CategoryNFT.MUSIC}>Music</MenuItem>
-                        <MenuItem value={CategoryNFT.OTHER}>Other</MenuItem>
+                        <MenuItem value={'Collectible'}>Collectible</MenuItem>
+                        <MenuItem value={'Art'}>Art</MenuItem>
+                        <MenuItem value={'Art'}>Photo</MenuItem>
+                        <MenuItem value={'Digital art'}>Digital art</MenuItem>
+                        <MenuItem value={'Document'}>Document</MenuItem>
+                        <MenuItem value={'Music'}>Music</MenuItem>
+                        <MenuItem value={'Other'}>Other</MenuItem>
                       </Select>
                       <br />
                       <br />
@@ -541,6 +543,15 @@ export const Dashboard = () => {
                         label={"Auto Renew Account ID"}
                         value={hashlipsToken.renewAccountId}
                         onInput={ e=>setHashlipsToken({...hashlipsToken, renewAccountId: e.target.value})}
+                    /> 
+                    <br />
+                    <br />
+                    <TextField          
+                        style={{width:'100%'}}
+                        placeholder={"Fallback Fee"}
+                        label={"Fallback Fee"}
+                        value={hashlipsToken.fallbackFee}
+                        onInput={ e=>setHashlipsToken({...hashlipsToken, fallbackFee: e.target.value})}
                     /> 
                     <br />
                     <br />

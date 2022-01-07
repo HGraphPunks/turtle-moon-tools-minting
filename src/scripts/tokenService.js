@@ -121,7 +121,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
     .setNumerator(numerator) // The numerator of the fraction
     .setDenominator(10000) // The denominator of the fraction
     .setFallbackFee(
-      new CustomFixedFee().setHbarAmount(new Hbar(5))
+      new CustomFixedFee().setHbarAmount(new Hbar(hashlipsToken.fallbackFee))
     ) // The fallback fee
     .setFeeCollectorAccountId(hashlipsToken['royaltyAccountId'+index]); // The account that will receive the royalty fee
     customRoyaltyFee.push(fee);

@@ -74,7 +74,7 @@ export const HLTokenView = () => {
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                               >
                             <TableCell component="th" scope="row">
-                              <Link onClick={()=> {openBlank(url)}}>IPFS</Link>
+                              <Link onClick={()=> {openBlank('https://cloudflare-ipfs.com/ipfs/' + url.split('ipfs://')[1])}}>IPFS</Link>
                             </TableCell>
                             <TableCell align="right">
                               {log?.nftIds[urlIndex]}

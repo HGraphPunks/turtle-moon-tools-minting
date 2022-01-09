@@ -45,17 +45,40 @@ export default function App() {
   const [loading, setLoading] = React.useState(false);
   const [xactClient, setXactClient] = React.useState({});
   const [qrData, setQrData] = React.useState('');
-  const [user, setUser] = React.useState(true);
+  const [user, setUser] = React.useState({});
   const handleDonationOpen = () => setDonationOpen(true);
   const handleDonationClose = () => setDonationOpen(false);
+
+  /* Init Hashlips Token  State */
+  const [hashlipsToken, setHashlipsToken] = React.useState(
+    {
+      name: '',
+      symbol: '',
+      maxSupply: '',
+      numOfRoyaltyFees: 1,
+      royalty0: '',
+      royaltyAccountId0: '',
+      treasuryAccountId: '',
+      renewAccountId: '',
+      fallbackFee: 5,
+      previousTokenId: ''
+    }
+  );
+
 
   const changeEnv = (event) => {
     setEnv(event.target.checked);
   };
 
+  const disconnectUser = () => {
+    setUser({})
+  };
+
   /* When ENV Toggle is hit, Update application */
   useEffect(async () => {
-    setUser(false)
+    setUser({...user,
+      accountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET  
+    })
     // Clear QR code data to display loading icon
     setQrData('')
     // set env to testnet by default
@@ -63,6 +86,10 @@ export default function App() {
     const client = {};
     setXactClient(client)
     setLoginOpen(false)
+    setHashlipsToken({...hashlipsToken,
+      treasuryAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
+      renewAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
+    })
 
   },[hederaMainnetEnv])
 
@@ -93,9 +120,10 @@ export default function App() {
       width: '100%'
     }
   });
+
   return (
     <ThemeProvider theme={darkTheme}>
-      <TMTProvider value={{hederaMainnetEnv:hederaMainnetEnv, user:user, xactClient: xactClient, setLoading: setLoading}}>
+      <TMTProvider value={{hederaMainnetEnv:hederaMainnetEnv, user:user, xactClient: xactClient, setLoading: setLoading, hashlipsToken:hashlipsToken, setHashlipsToken:setHashlipsToken }}>
       <AppBar position='static' style={{margin: '0 auto'}}>
         <Toolbar style={{position:'relative', width: '96vw', margin: '0 auto', maxWidth: '1200px'}} > 
           <img src={logo} style={{width:'50px', height:'50px'}} />
@@ -125,9 +153,9 @@ export default function App() {
                     />
                   </FormGroup>
                 </div>
-          {/* <Button variant="contained" onClick={disconnectUser}>
+          {user?.accountId ? <Button variant="contained" onClick={disconnectUser}>
             Disconect {user.accountId}
-          </Button> */}
+          </Button>: <></>}
           <Modal
               open={donationOpen}
               onClose={handleDonationClose}

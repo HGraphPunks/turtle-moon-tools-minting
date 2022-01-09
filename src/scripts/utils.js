@@ -34,8 +34,7 @@ export const hederaClient = (hederaMainnetEnv) => {
 export const hederaClientLocal = (operatorAccount, operatorPrivateKey, hederaMainnetEnv) => {
   let client;
 
-  // hederaMainnetEnv ? client = Client.forMainnet() : client = Client.forTestnet();
-  client = Client.forTestnet();
+  hederaMainnetEnv ? client = Client.forMainnet() : client = Client.forTestnet();
 
   client.setOperator(operatorAccount, operatorPrivateKey);
 

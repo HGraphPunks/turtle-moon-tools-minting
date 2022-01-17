@@ -169,7 +169,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
   let nftIds = [];
   let urls = [];
   let limit_chunk = 5;
-
+  metadataCIDs = metadataCIDs.reverse()
   const nbOfChunk = Math.ceil(metadataCIDs.length / limit_chunk);
   let supplyClone = metadataCIDs.length-1;
   let resp;

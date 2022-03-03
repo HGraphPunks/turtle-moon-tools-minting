@@ -1,11 +1,9 @@
 import {hederaClient} from '../scripts/utils'
-import {createIPFSMetaData} from './fileService'
+import {createIPFSMetaData, createSingleIPFSMetaData} from './fileService'
 
 const fs = window.require('fs');
 
 import {
-  TokenNftInfoQuery,
-  TokenId,
   CustomFixedFee,
   CustomRoyaltyFee,
   Hbar,
@@ -17,43 +15,66 @@ import {
   TokenType,
 } from "@hashgraph/sdk";
 
-const readJson = (url, setMintJSON) => {
-  return fetch(url)
-  .then(response => {
-      if (!response.ok) {
-          throw new Error("HTTP error " + response.status);
+export const singleImageMint = async (hederaMainnetEnv, token, user, setLoading) => {
+  const client = hederaClient(hederaMainnetEnv, user)
+  
+  let attributes =[]
+
+  const tokenMetaData = {
+    name: token?.name,
+    description: token?.description,
+    creator: token?.creator,
+    maxSupply: parseInt(token?.maxSupply),
+    attributes: attributes,
+  }
+
+  if (parseInt(token?.numOfAttributes) > 0) {
+    for (let index = 0; index < parseInt(token.numOfAttributes); index++) {
+      let trait_type = token['trait_type'+index];
+      let value = token['value'+index];
+      let attribute = {
+        trait_type: trait_type,
+        value: value
       }
-      return response.json();
-  })
-  .then(json => {
-      console.log(json);
-      return json;
-  })
-  .catch(function () {
-      console.log('NFT STORAGE READ DATA ERROR')
-  })
+      attributes.push(attribute);
+    }
+  }
+  tokenMetaData.attributes = attributes
+
+  const metadataCIDs = await createSingleIPFSMetaData(token?.imageData, tokenMetaData, user?.nftStorageAPI);
+  let finalCIDS = []
+  for (let j = 0; j < tokenMetaData?.maxSupply; j++) {
+    finalCIDS[j] = metadataCIDs.url
+  }
+
+  token.treasuryAccountId = user.accountId
+  token.renewAccountId = user.accountId
+  createNFTs(client, token, finalCIDS, user.pk, hederaMainnetEnv, setLoading);
 }
 
-export const mintHashlips = async (hashlipsToken, hederaMainnetEnv) => {
-  const client = hederaClient(hederaMainnetEnv)
+export const mintHashlips = async (hashlipsToken, user, hederaMainnetEnv, setLoading) => {
+  const client = hederaClient(hederaMainnetEnv, user)
   const hashLipsImages = document.getElementById("hl-images").files;
   const hashLipsJSON = document.getElementById("hl-json").files;
   const metaDataPath = hashLipsJSON[0].path;
   let rawdata = fs.readFileSync(metaDataPath);
   let hashlipsMetaData = JSON.parse(rawdata);
   
-  const metadataCIDs = await createIPFSMetaData(hashLipsImages, hashlipsMetaData, hederaMainnetEnv);
+  const metadataCIDs = await createIPFSMetaData(hashLipsImages, hashlipsMetaData, user.nftStorageAPI);
+  console.log(hashlipsToken);
   console.log(metadataCIDs);
-  createNFTs(client, hashlipsToken, metadataCIDs, hederaMainnetEnv);
+  console.log(user);
+
+  createNFTs(client, hashlipsToken, metadataCIDs, user.pk, hederaMainnetEnv, setLoading);
 }
 
-const mintExisitngToken = async (client, tokenId, metadataCIDs, hederaMainnetEnv) => {
+const mintExisitngToken = async (client, tokenId, metadataCIDs, hederaMainnetEnv, setLoading) => {
   // TODO: Make ths DRY
   /* Mint the token */
   let nftIds = [];
   let urls = [];
   let limit_chunk = 5;
-  let rawdata = localStorage.getItem('supplyKey'); //fs.readFileSync('./supplyKey.json');
+  let rawdata = localStorage.getItem('supplyKey_'+tokenId.toString()); //fs.readFileSync('./supplyKey.json');
   let supplyKey = PrivateKey.fromString(rawdata);
   const nbOfChunk = Math.ceil(metadataCIDs.length / limit_chunk);
   let supplyClone = metadataCIDs.length-1;
@@ -99,9 +120,10 @@ const mintExisitngToken = async (client, tokenId, metadataCIDs, hederaMainnetEnv
   });
   console.log(mintData)
   localStorage.setItem('hashlipsMintData_' + tokenId.toString() , mintData)
+  setLoading(false)
 }
 
-export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMainnetEnv) => {
+export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, hederaMainnetEnv, setLoading) => {
   // Init value for token ID to mint metadata
   let tokenId; 
   let adminKey;
@@ -110,7 +132,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
 
   // If minting on a token ID that's already created, skip creatining initial token
   if (hashlipsToken.previousTokenId) {
-    mintExisitngToken(client, hashlipsToken.previousTokenId, metadataCIDs, hederaMainnetEnv)
+    mintExisitngToken(client, hashlipsToken.previousTokenId, metadataCIDs, hederaMainnetEnv, setLoading)
     return
   }
     /* Create a royalty fee */
@@ -126,9 +148,10 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
     .setFeeCollectorAccountId(hashlipsToken['royaltyAccountId'+index]); // The account that will receive the royalty fee
     customRoyaltyFee.push(fee);
   }
-  
-  adminKey = PrivateKey.generate();
+  const privateKey = PrivateKey.fromString(userPk);
 
+  adminKey = privateKey;
+  
   supplyKey = PrivateKey.generate();
   
   freezeKey = PrivateKey.generate();
@@ -146,12 +169,11 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
     .setAutoRenewAccountId(hashlipsToken.renewAccountId)
     .setSupplyKey(supplyKey)
     .setMaxTransactionFee(new Hbar(1000))
-    .freezeWith(client);
     // .setAdminKey(adminKey)
     // .setFreezeKey(freezeKey)
-
+    .freezeWith(client);
+    
   // const transaction = await tx.signWithOperator(client);
-  const privateKey = hederaMainnetEnv ? PrivateKey.fromString(process.env.REACT_APP_MY_PRIVATE_KEY_MAINNET) : PrivateKey.fromString(process.env.REACT_APP_MY_PRIVATE_KEY_TESTNET)
   const transaction = await tx.sign(privateKey);
 
   /*  submit to the Hedera network */
@@ -219,189 +241,19 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, hederaMain
 
 
   let saveSupplyKey = supplyKey.toString()
+  let saveAdminKey = adminKey.toString()
+  let saveFreezeKey = freezeKey.toString()
   // fs.appendFile(`../supplyKey.json`, saveSupplyKey, (err) => {
   //   if (err) throw err;
   //   console.log('supply key written to file');
   // });
-  
   localStorage.setItem('supplyKey_'+tokenId.toString(), saveSupplyKey)
-  console.log(saveSupplyKey)
+  localStorage.setItem('adminKey_'+tokenId.toString(), saveAdminKey)
+  localStorage.setItem('freezeKey_'+tokenId.toString(), saveFreezeKey)
+  setLoading(false)
+  alert(`Minting Success!\n\nNewly minted token data:\n\nToken ID: ${tokenId.toString()}\n\nSupply Key: ${saveSupplyKey}\n\nSupply key has also been saved into local storage.`);
+  // console.log(saveSupplyKey)
+  // console.log(saveAdminKey)
+  // console.log(saveFreezeKey)
   localStorage.setItem('hashlipsMintData_' + tokenId.toString() , mintData)
-}
-
-/* TODO: Create method for mass uploading of NFTs from Hashlips */
-export const xactCreateToken  = async (accountId, client, hederaMainnetEnv, token, setLoading) => {
-  setLoading(true)
-  
-  /* Add in confirmation step for MAINNET minting */
-  if (hederaMainnetEnv) {
-    const r = confirm("You are about to mint on the MAINNET. Do you want to proceed?");
-    if (r !== true) {
-      return alert('Minting process cancelled')
-    }
-  }
-  
-  const createAndMintObj = {
-    name: token?.name,
-    description: token?.description,
-    category: token?.category,
-    creator: token?.creator,
-    media: token?.imageData,
-    supply: parseInt(token?.supply),
-    customRoyaltyFee: {
-      numerator: parseInt(token?.royalty),
-      denominator: 100,
-      fallbackFee: 100,
-    },
-    // attributes: NFTJson?.attributes,
-    // customProperties: NFTJson?.customProperties,
-    fromAccountId: accountId
-  }
-  
-  await client.createNFT(createAndMintObj);
-  client.createNFTValidation().subscribe(async nft => {
-    setLoading(false)
-    /* Save response in local storage for debugging */
-    const tmt_tokens = localStorage.getItem('tmt_tokens') ? JSON.parse(localStorage.getItem('tmt_tokens')) : [];
-    const tokenJSON = await readJson(nft.url);
-    const imageURL = await readJson(tokenJSON?.image?.description);
-
-  
-    tmt_tokens.push({
-      nft,
-      tokenJSON,
-      imageURL,
-      mainnet: hederaMainnetEnv
-    }); 
-    localStorage.setItem('tmt_tokens', JSON.stringify(tmt_tokens));
-  });
-}
-
-
-export const tokenGetInfo = async (tokenId, accountId) => {
-  // TODO - Make this work
-  const client = hederaClient(accountId);
-  const tmt_tokens = localStorage.getItem('tmt_tokens') ? JSON.parse(localStorage.getItem('tmt_tokens')) : [];
-  const tokenMints = tmt_tokens.filter((tx) => {return tx.tokenId === tokenId})
-  const tokenResponse = tokenMints[0]?.token;
-  const tokenIdNew = new TokenId(tokenId)
-  const nftID = new NftId(tokenIdNew, '1')
-
-  try {
-      const nftInfo = await new TokenNftInfoQuery()
-        .setNftId(nftID)
-        .execute(client);
-      
-      const metadata = nftInfo[0].metadata.toString();
-      console.log(nftInfo)
-      console.log(metadata)
-      // console.log(fileMirrorURL)
-  } catch (err) {
-      alert(err.message);
-  }
-  return tokenResponse
-}
-
-
-export const sellNFT = async (NFTForSale, xactClient) => {
-  // If we weren't able to grab it, we should throw a new error
-  if (xactClient == null) {
-    throw new Error("Xact connection must be present");
-  }  
-  
-  /* Update strings to integers for endpoint */
-  const obj = NFTForSale;
-  obj.hbarAmount = parseInt(obj.hbarAmount);
-  obj.quantity = parseInt(obj.quantity);
-  obj.nftIds = NFTForSale.nftIds.split(',');
-  obj.isCollection = false;
-  
-  if (NFTForSale.quantity) {
-    delete obj.nftIds
-    const saleResponse = await xactClient.sellNFT(obj);
-    console.log(saleResponse)
-  } else {
-    delete obj.quantity
-    const saleResponse = await xactClient.sellNFT(obj);
-    console.log(saleResponse)
-  }
-
-  /* Subscribe to new sale NFT Validation */
-  xactClient.sellNFTValidation().subscribe(nft => {
-    console.log('NFT successfully set in sale', nft);
-    console.log(nft);
-  });
-
-  console.log('sellNFT Call Success')
-}
-
-export const refreshAccount = async () => {
-  const user =  await this.client.refreshAccount({ accountId: "0.0.1960117"})
-  console.log(user)
-}
-
-export const removeNFTFromSale = async (tokenId, xactPrivateKey) => {
-    const apiKey = xactPrivateKey;
-
-    // If we weren't able to grab it, we should throw a new error
-    if (apiKey == null) {
-        throw new Error("Environment variables API_KEY must be present");
-    }
-
-    /* Create a new instance of Client */
-    const client = new Client({apiKey});
-    
-    /* Init the connexion */
-    await client.initConnexion();
-    await client.deleteNFTFromSale({tokenId});
-    
-    /* Subscribe to new sale NFT Validation */
-    client.deleteSellNFTValidation().subscribe(nft => {
-        console.log('NFT successfully removed from sale', nft);
-    });
-}
-
-export const getNFTQRCode = async (saleQRCode, xactClient, hederaMainnetEnv) => {
-
-  const res = await xactClient.getNFTForSaleByTokenId({tokenId: saleQRCode.tokenId, nftId: `${saleQRCode.nftIdNum}@${saleQRCode.tokenId}`});
-  
-  // TODO: Create local storage function for all objects to use.
-  const tmt_qrcodes = localStorage.getItem('tmt_qrcodes') ? JSON.parse(localStorage.getItem('tmt_qrcodes')) : [];
-  tmt_qrcodes.push({
-    nft: res?.nft,
-    qrCode: res?.qrCode,
-    tokenId: res?.nft?.tokenId,
-    nftId: res?.nft?.nftId,
-    mainnet: hederaMainnetEnv
-  }); 
-  localStorage.setItem('tmt_qrcodes', JSON.stringify(tmt_qrcodes));
-  console.log(tmt_qrcodes);
-}
-
-
-export const associateToken = async (xactPrivateKey) => {
-  const apiKey = xactPrivateKey;
-
-  // Create Client
-  const client = new Client({apiKey, debugLevel: DebugLevel.DEBUG});
-
-  // If we weren't able to grab it, we should throw a new error
-  if (apiKey == null) {
-      throw new Error("Environment variables API_KEY must be present");
-  }
-  
-  /* Init the connexion */
-  await client.initConnexion();
-
-  // /* Update the fields with your informations */
-  const fromAccountId = '0.0.1960117';
-  const tokenId = '0.0.2778004';
-
-  /* Request for association */
-  await client.associate({fromAccountId, tokenId});
-
-  /* Listen for Association's success */
-  client.associateValidation().subscribe(token => {
-      console.log('New associated token', token);
-  });
 }

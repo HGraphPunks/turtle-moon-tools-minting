@@ -15,12 +15,13 @@ export const checkProvided = (environmentVariable) => {
     return true;
 }
 
-export const hederaClient = (hederaMainnetEnv) => {
-  const operatorAccount = hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET; 
-  const operatorPrivateKey = hederaMainnetEnv ? process.env.REACT_APP_MY_PRIVATE_KEY_MAINNET : process.env.REACT_APP_MY_PRIVATE_KEY_TESTNET;
+export const hederaClient = (hederaMainnetEnv, user) => {
+  debugger
+  const operatorAccount = user.accountId; 
+  const operatorPrivateKey = user.pk;
 
   console.log(hederaMainnetEnv);
-  console.log(operatorPrivateKey);
+  // console.log(operatorPrivateKey);
   console.log(operatorAccount);
   
   if (!checkProvided(operatorPrivateKey) || !checkProvided(operatorAccount)) {

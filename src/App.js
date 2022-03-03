@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useEffect} from 'react'
 import Container from '@mui/material/Container';
-import {Button, Box, TextField, Typography, Modal} from '@mui/material';
+import {Button, Box, TextField, Typography, Modal, StepConnector} from '@mui/material';
 import Link from '@mui/material/Link';
 import AppBar from '@mui/material/AppBar';
 import {Toolbar, FormGroup, FormControlLabel, Switch} from '@mui/material';
@@ -26,9 +26,6 @@ function Copyright() {
           Turtle Moon
         </Link>{' '}
         {new Date().getFullYear()}. {' '}
-        <Link color="inherit" href="https://docs.xact.ac/sdk/javascript">
-          Powered by Xact 
-        </Link>{' '}
         <br/>
       </Typography>
       <br />
@@ -45,9 +42,11 @@ export default function App() {
   const [loading, setLoading] = React.useState(false);
   const [xactClient, setXactClient] = React.useState({});
   const [qrData, setQrData] = React.useState('');
-  const [user, setUser] = React.useState({});
-  const handleDonationOpen = () => setDonationOpen(true);
-  const handleDonationClose = () => setDonationOpen(false);
+  const [user, setUser] = React.useState({
+    accountId: '',
+    pk: '',
+    nftStorageAPI: '',
+  });
 
   /* Init Hashlips Token  State */
   const [hashlipsToken, setHashlipsToken] = React.useState(
@@ -65,31 +64,63 @@ export default function App() {
     }
   );
 
+  /* Init Tokeen State */
+  const [token, setToken] = React.useState(
+    {
+      name: '',
+      tokenId: '',
+      description: '',
+      creator: '',
+      supply: '',
+      category: 'Collectible',
+      royalty: '',
+      numOfRoyaltyFees: 0,
+      numOfAttributes: 0,
+      imageUrl: '',
+      imageData: undefined,
+      imageType: 'image/jpg',
+      photoSize: 1,
+      treasuryAccountId: '',
+      renewAccountId: '',
+    }
+  );
+
 
   const changeEnv = (event) => {
     setEnv(event.target.checked);
+    const savedUser = localStorage.getItem('tmt_user_mainnet-'+event.target.checked) || JSON.stringify({
+      accountId: '',
+      pk: '',
+      nftStorageAPI: '',
+    })
+    setUser(JSON.parse(savedUser));
   };
 
   const disconnectUser = () => {
     setUser({})
+    setLoginOpen(true)
+  };
+
+  const tmtConnect = () => {
+    setLoginOpen(false)
+    localStorage.setItem('tmt_user_mainnet-'+hederaMainnetEnv, JSON.stringify(user));
   };
 
   /* When ENV Toggle is hit, Update application */
   useEffect(async () => {
-    setUser({...user,
-      accountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET  
-    })
+    // setUser({...user,
+    //   accountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET  
+    // })
     // Clear QR code data to display loading icon
     setQrData('')
     // set env to testnet by default
-  
-    const client = {};
-    setXactClient(client)
-    setLoginOpen(false)
-    setHashlipsToken({...hashlipsToken,
-      treasuryAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
-      renewAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
-    })
+    const savedUser = localStorage.getItem('tmt_user_mainnet-'+hederaMainnetEnv) || JSON.stringify(user)
+    setUser(JSON.parse(savedUser));
+    setLoginOpen(true)
+    // setHashlipsToken({...hashlipsToken,
+    //   treasuryAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
+    //   renewAccountId: hederaMainnetEnv ? process.env.REACT_APP_MY_ACCOUNT_ID_MAINNET : process.env.REACT_APP_MY_ACCOUNT_ID_TESTNET,
+    // })
 
   },[hederaMainnetEnv])
 
@@ -123,81 +154,23 @@ export default function App() {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <TMTProvider value={{hederaMainnetEnv:hederaMainnetEnv, user:user, xactClient: xactClient, setLoading: setLoading, hashlipsToken:hashlipsToken, setHashlipsToken:setHashlipsToken }}>
+      <TMTProvider value={{hederaMainnetEnv:hederaMainnetEnv, user:user, token:token, setToken:setToken, setLoading: setLoading, hashlipsToken:hashlipsToken, setHashlipsToken:setHashlipsToken }}>
       <AppBar position='static' style={{margin: '0 auto'}}>
-        <Toolbar style={{position:'relative', width: '96vw', margin: '0 auto', maxWidth: '1200px'}} > 
+        <Toolbar style={{position:'relative', width: '100vw', margin: '0 auto', maxWidth: '1200px'}} > 
           <img src={logo} style={{width:'50px', height:'50px'}} />
           &nbsp;
           &nbsp;
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} style={{color: 'grey'}}>
-            Alpha (v0.0.8) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
+            Beta (v0.9.1) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
           </Typography> 
-          <Button onClick={handleDonationOpen}>
-            Donate
-          </Button>
           &nbsp;
           &nbsp;
           &nbsp;
           &nbsp;
-          <div style={{display:'flex', maringBottom: '25px', alignItems: 'center', justifyContent: 'center'}}>
-                  <FormGroup>
-                  <FormControlLabel
-                      label={hederaMainnetEnv ? 'Mainnet' : 'Testnet'}
-                      control={
-                        <Switch
-                          checked={hederaMainnetEnv}
-                          onChange={changeEnv}
-                          aria-label="env switch"
-                        />
-                      }
-                    />
-                  </FormGroup>
-                </div>
+          {/*  */}
           {user?.accountId ? <Button variant="contained" onClick={disconnectUser}>
             Disconect {user.accountId}
           </Button>: <></>}
-          <Modal
-              open={donationOpen}
-              onClose={handleDonationClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <Box sx={style}>
-                <Typography style={{textAlign:'center'}} id="modal-modal-title" variant="h6" component="h2">
-                  Donate to 🐢🌕🛠️
-                </Typography>
-                { true ?
-                  <Typography style={{textAlign:'center'}} sx={{ mt: 2 }}>
-                    We appreicate your support!<br /><br />You can send HBAR to this address<br /> <span style={{fontSize:"25px"}}>0.0.591814</span><br />
-                  <br />   
-            
-                  </Typography>
-                  :
-                  <>
-                    <Typography style={{textAlign:'center'}} sx={{ mt: 2 }}>   
-                      We appreicate your support! <br />  <br /> 
-                      Enter amount below and hit "donate".
-                      Then accept the transaction with the wallet you are logged in with. 
-                    </Typography>
-                    <br />
-                    <br />
-                    <TextField 
-                      label="Donation Amount"
-                      style={{width:'100%'}}
-                      value={amount}
-                      type="number"
-                      onInput={ e=>setDonationAmount(e.target.value)}
-                      >
-                    </TextField>
-                    <br />
-                    <br />
-                    <Button variant="contained" style={{width:'100%'}} onClick={()=>{donation(xactClient, user.accountId, amount, setLoading)}} >
-                      Donate
-                    </Button>
-                  </>
-                }
-              </Box>
-          </Modal>
           <Modal
               open={loginOpen}
               aria-labelledby="modal-modal-title"
@@ -205,38 +178,75 @@ export default function App() {
             >
               <Box sx={style}>
                 <Typography style={{textAlign:'center'}} id="modal-modal-title" variant="h6" component="h2">
-                  Login with XACT dApp Browser
+                  Account ID and Private Key
                 </Typography>
                 <br />
                 <br />
-                <div style={{margin: '0 auto', height: '256px', display:'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  
-                  { qrData ? 
-                    <img src={qrData} style={{margin: '0 auto'}} /> 
-                   :<Loading />
-                  }
-                  </div>
+                <TextField          
+                    style={{width:'100%'}}
+                    type="text"
+                    placeholder={"Account ID"}
+                    label={"Minting Account ID"}
+                    value={user.accountId}
+                    onInput={ e=>setUser({...user, accountId: e.target.value})}
+                /> 
+                <br />
+                <br />
+                <TextField          
+                    style={{width:'100%'}}
+                    type="text"
+                    placeholder={"Minting Private Key"}
+                    label={"Minting Wallet Private Key"}
+                    value={user.pk}
+                    onInput={ e=>setUser({...user, pk: e.target.value})}
+                /> 
+                <br />
+                <br />
+                <TextField          
+                    style={{width:'100%'}}
+                    type="text"
+                    placeholder={"NFT Storage API Key"}
+                    label={"NFT Storage API Key"}
+                    value={user.nftStorageAPI}
+                    onInput={ e=>setUser({...user, nftStorageAPI: e.target.value})}
+                /> 
                 <br />
                 <br />
                 <div style={{display:'flex', maringBottom: '25px', alignItems: 'center', justifyContent: 'center'}}>
                   <FormGroup>
-                  <FormControlLabel
-                      label={hederaMainnetEnv ? 'Mainnet' : 'Testnet'}
-                      control={
-                        <Switch
-                          checked={hederaMainnetEnv}
-                          onChange={changeEnv}
-                          aria-label="env switch"
-                        />
-                      }
-                    />
+                    <FormControlLabel
+                        label={hederaMainnetEnv ? 'Mainnet' : 'Testnet'}
+                        control={
+                          <Switch
+                            checked={hederaMainnetEnv}
+                            onChange={changeEnv}
+                            aria-label="env switch"
+                          />
+                        }
+                      />
                   </FormGroup>
+                </div>
+                <Button
+                    style={{width:'100%', margin: '20px auto'}}
+                    variant="contained"
+                    component="label"
+                    onClick={() => {tmtConnect()}}
+                >
+                  Connect
+                </Button>
+                <br />
+                <div style={{color: '#8159EF',textAlign:'center'}}>
+                  Any use of of this BETA application is done at your own risk.  
+                </div>
+                <br />
+                <div style={{color: '#8159EF', textAlign:'center'}}>
+                  Share your creations on twitter with the hashtag #TMTNFT @TurtleMoonCC
                 </div>
                 <br />
                 <div style={{color: '#8159EF', display:'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    We appreicate your support!
+                    We appreciate your support!
                 </div>
-                <div><center><div style={{color: '#8159EF'}}>Donation Wallet:</div><b>0.0.591814</b></center></div><br />
+                <div><center><div style={{color: '#8159EF', fontSize:'20pt'}}>Donation Wallet:</div><b>0.0.591814</b></center></div><br />
               </Box>
           </Modal>
           <Modal
@@ -250,7 +260,7 @@ export default function App() {
                   <Loading />
               </div>    
               <Typography style={{textAlign:'center'}} id="modal-modal-title" variant="h6" component="h2">
-                Loading... 
+                Minting...  
               </Typography>   
             </Box>
           </Modal>

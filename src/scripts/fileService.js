@@ -1,6 +1,23 @@
 import { Blob, NFTStorage, File } from "nft.storage";
 
-export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, hederaMainnetEnv) => {
+
+
+export const createSingleIPFSMetaData = async (hashLipsImage, metaData, nftStorageAPI) => {
+  return new Promise(async (resolve, reject) => {
+    const NFT_STORAGE_API_KEY = nftStorageAPI
+    const nftStorageClient = new NFTStorage({ token: NFT_STORAGE_API_KEY });
+    const metadataCID = await nftStorageClient.store({
+      ...metaData,
+      image: new File([hashLipsImage], `${metaData?.name}.jpg`, {
+        type: 'image/jpg',
+      })
+    })
+    resolve(metadataCID)
+  })
+}
+
+
+export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, nftStorageAPI) => {
   return new Promise(async (resolve, reject) => {
 
     const hashLipsImagesArray = Array.from(hashLipsImages)
@@ -13,7 +30,7 @@ export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, heder
     }
 
     // Set NFT Storage API Key and Create NFT Storage Client
-    const NFT_STORAGE_API_KEY = hederaMainnetEnv ? process.env.REACT_APP_NFT_STORAGE_API_KEY_MAINNET : process.env.REACT_APP_NFT_STORAGE_API_KEY_TESTNET;
+    const NFT_STORAGE_API_KEY = nftStorageAPI;
     const nftStorageClient = new NFTStorage({ token: NFT_STORAGE_API_KEY });
 
     // Sort file list from upload to match metadata JSON from Hashlips. 
@@ -25,7 +42,7 @@ export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, heder
       for (let index = 0; index < hashlipsMetaData.length; index++) {
         const metadata = await nftStorageClient.store({
           ...hashlipsMetaData[index],
-          image: new File([sortedHashLipsImagesArray[index]], `genart_${index}.jpg`, {
+          image: new File([sortedHashLipsImagesArray[index]], `${index}.jpg`, {
             type: 'image/jpg',
           })
         })

@@ -1,6 +1,6 @@
 {
   "name": "turtle-moon-tools",
-  "version": "0.1.0",
+  "version": "0.9.1",
   "private": false,
   "author": "Turtle Moon",
   "description": "Turtle Moon Tools - Minting",
@@ -59,6 +59,7 @@
     "test": "craco test",
     "eject": "react-scripts eject",
     "dev": "concurrently -k \"BROWSER=none npm start\" \"npm:electron\"",
+    "app:dist": "electron-builder",
     "electron:start": "concurrently -k \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electronmon .\"",
     "electron:package:mac": "yarn build && electron-builder -m -c.extraMetadata.main=build/electron.js",
     "electron:package:win": "yarn build && electron-builder -w -c.extraMetadata.main=build/electron.js",
@@ -78,6 +79,7 @@
     "electron": "^15.3.0",
     "electron-is-dev": "^2.0.0",
     "electron-packager": "^15.4.0",
+    "electron-builder": "^22.14.13",
     "wait-on": "^6.0.0"
   }
 }

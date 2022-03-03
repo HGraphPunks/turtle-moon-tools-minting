@@ -236,7 +236,7 @@ export default function App() {
                 </Button>
                 <br />
                 <div style={{color: '#8159EF',textAlign:'center'}}>
-                  Any use of of this BETA application is done at your own risk.  
+                  Any use of this BETA application is done at your own risk.  You can ask questions / report issues <a onClick={window.open('https://discord.gg/WAcThxbdNv', '_blank', 'top=500,left=200,frame=true,nodeIntegration=no')} style={{color: '#B67CFF'}}href="https://discord.gg/WAcThxbdNv">in our discord</a>
                 </div>
                 <br />
                 <div style={{color: '#8159EF', textAlign:'center'}}>
@@ -246,7 +246,7 @@ export default function App() {
                 <div style={{color: '#8159EF', display:'flex', alignItems: 'center', justifyContent: 'center'}}>
                     We appreciate your support!
                 </div>
-                <div><center><div style={{color: '#8159EF', fontSize:'20pt'}}>Donation Wallet:</div><b>0.0.591814</b></center></div><br />
+                <div><center><div style={{color: '#8159EF', fontSize:'16pt'}}>Donation Wallet:</div><span style={{fontSize:'16pt'}}><b>0.0.591814</b></span></center></div><br />
               </Box>
           </Modal>
           <Modal

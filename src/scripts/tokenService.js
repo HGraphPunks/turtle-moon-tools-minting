@@ -16,7 +16,7 @@ import {
 } from "@hashgraph/sdk";
 
 export const singleImageMint = async (hederaMainnetEnv, token, user, setLoading) => {
-  const image = document.getElementById("single-image").files;
+  const image = document.getElementById("single-image").files[0];
   const client = hederaClient(hederaMainnetEnv, user)
   
   let attributes =[]
@@ -64,7 +64,6 @@ export const mintHashlips = async (hashlipsToken, user, hederaMainnetEnv, setLoa
   const metadataCIDs = await createIPFSMetaData(hashLipsImages, hashlipsMetaData, user.nftStorageAPI);
   console.log(hashlipsToken);
   console.log(metadataCIDs);
-  console.log(user);
 
   createNFTs(client, hashlipsToken, metadataCIDs, user.pk, hederaMainnetEnv, setLoading);
 }

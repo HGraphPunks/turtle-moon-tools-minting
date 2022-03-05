@@ -2,16 +2,17 @@ import { Blob, NFTStorage, File } from "nft.storage";
 
 
 
-export const createSingleIPFSMetaData = async (hashLipsImage, metaData, nftStorageAPI) => {
+export const createSingleIPFSMetaData = async (file, metaData, nftStorageAPI) => {
   return new Promise(async (resolve, reject) => {
     const NFT_STORAGE_API_KEY = nftStorageAPI
     const nftStorageClient = new NFTStorage({ token: NFT_STORAGE_API_KEY });
     const metadataCID = await nftStorageClient.store({
       ...metaData,
-      image: new File([hashLipsImage], `${metaData?.name}.jpg`, {
-        type: 'image/jpg',
+      image: new File([file], `${metaData?.name}`, {
+        type: file.type,
       })
     })
+    console.log(metadataCID)
     resolve(metadataCID)
   })
 }
@@ -42,8 +43,8 @@ export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, nftSt
       for (let index = 0; index < hashlipsMetaData.length; index++) {
         const metadata = await nftStorageClient.store({
           ...hashlipsMetaData[index],
-          image: new File([sortedHashLipsImagesArray[index]], `${index}.jpg`, {
-            type: 'image/jpg',
+          image: new File([sortedHashLipsImagesArray[index]], `${index}`, {
+            type: sortedHashLipsImagesArray[index].type,
           })
         })
         metaDataCIDs.push(metadata.url);

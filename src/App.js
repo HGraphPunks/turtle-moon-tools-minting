@@ -161,7 +161,7 @@ export default function App() {
           &nbsp;
           &nbsp;
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} style={{color: 'grey'}}>
-            Beta (v0.9.1) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
+            Beta (v0.9.2) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
           </Typography> 
           &nbsp;
           &nbsp;
@@ -236,7 +236,7 @@ export default function App() {
                 </Button>
                 <br />
                 <div style={{color: '#8159EF',textAlign:'center'}}>
-                  Any use of this BETA application is done at your own risk.  You can ask questions / report issues <a onClick={window.open('https://discord.gg/WAcThxbdNv', '_blank', 'top=500,left=200,frame=true,nodeIntegration=no')} style={{color: '#B67CFF'}}href="https://discord.gg/WAcThxbdNv">in our discord</a>
+                  Any use of this BETA application is done at your own risk.
                 </div>
                 <br />
                 <div style={{color: '#8159EF', textAlign:'center'}}>

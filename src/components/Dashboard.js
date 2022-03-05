@@ -47,7 +47,7 @@ import TMTContext from '../context/tmt-context'
 export const Dashboard = () => {
     /* Create State for Tabs */
     const [tab, setTab] = useState('1');
-    
+     
     // Read context of signed in Xact wallet creds
     const context = useContext(TMTContext)
     const user = context?.user
@@ -208,7 +208,7 @@ export const Dashboard = () => {
         <br />
         <br />
       </>)
-    }
+  }
     return( 
       <div>
         <Box md={{ width: '100%', typography: 'body1' }}>
@@ -363,6 +363,7 @@ export const Dashboard = () => {
                           Upload File
                         <input
                           type="file"
+                          id="single-image"
                           onChange={(e) => uploadFile(e, token, setToken)}
                           hidden
                         />

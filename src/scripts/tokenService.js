@@ -16,6 +16,7 @@ import {
 } from "@hashgraph/sdk";
 
 export const singleImageMint = async (hederaMainnetEnv, token, user, setLoading) => {
+  const image = document.getElementById("single-image").files;
   const client = hederaClient(hederaMainnetEnv, user)
   
   let attributes =[]
@@ -41,7 +42,7 @@ export const singleImageMint = async (hederaMainnetEnv, token, user, setLoading)
   }
   tokenMetaData.attributes = attributes
 
-  const metadataCIDs = await createSingleIPFSMetaData(token?.imageData, tokenMetaData, user?.nftStorageAPI);
+  const metadataCIDs = await createSingleIPFSMetaData(image, tokenMetaData, user?.nftStorageAPI);
   let finalCIDS = []
   for (let j = 0; j < tokenMetaData?.maxSupply; j++) {
     finalCIDS[j] = metadataCIDs.url

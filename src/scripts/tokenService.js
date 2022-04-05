@@ -55,13 +55,24 @@ export const singleImageMint = async (hederaMainnetEnv, token, user, setLoading)
 
 export const mintHashlips = async (hashlipsToken, user, hederaMainnetEnv, setLoading) => {
   const client = hederaClient(hederaMainnetEnv, user)
-  const hashLipsImages = document.getElementById("hl-images").files;
-  const hashLipsJSON = document.getElementById("hl-json").files;
-  const metaDataPath = hashLipsJSON[0].path;
-  let rawdata = fs.readFileSync(metaDataPath);
-  let hashlipsMetaData = JSON.parse(rawdata);
+  let uploadedCIDsMetadata
+  let hashLipsImages
+  let hashlipsMetaData
+  if (hashlipsToken.alreadyCreatedCIDs){
+    let uploadedCIDs = document.getElementById("cid-json").files;
+    const metaDataPath = uploadedCIDs[0].path;
+    const rawdata = fs.readFileSync(metaDataPath);
+    uploadedCIDsMetadata = JSON.parse(rawdata);
+  } else {
+    hashLipsImages = document.getElementById("hl-images").files;
+    let hashLipsJSON = document.getElementById("hl-json").files;
+    const metaDataPath = hashLipsJSON[0].path;
+    const rawdata = fs.readFileSync(metaDataPath);
+    hashlipsMetaData = JSON.parse(rawdata);
+  }
   
-  const metadataCIDs = await createIPFSMetaData(hashLipsImages, hashlipsMetaData, user.nftStorageAPI);
+  
+  const metadataCIDs = hashlipsToken.alreadyCreatedCIDs ? uploadedCIDsMetadata : await createIPFSMetaData(hashLipsImages, hashlipsMetaData, user.nftStorageAPI);
   console.log(hashlipsToken);
   console.log(metadataCIDs);
 
@@ -135,6 +146,9 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
     mintExisitngToken(client, hashlipsToken.previousTokenId, metadataCIDs, hederaMainnetEnv, setLoading)
     return
   }
+  if (hashlipsToken.alreadyCreatedCIDs) {
+    metadataCIDs = metadataCIDs.reverse()
+  }
     /* Create a royalty fee */
   const customRoyaltyFee = [];
   for (let index = 0; index < parseInt(hashlipsToken.numOfRoyaltyFees); index++) {
@@ -185,7 +199,8 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
   /* Get the token ID from the receipt */
   tokenId = receipt.tokenId;
 
-  console.log(tokenId);
+  console.log('token Id',tokenId);
+  console.log('suppplyKey (KEEP SECRET)',supplyKey);
 
   /* Mint the token */
   let nftIds = [];

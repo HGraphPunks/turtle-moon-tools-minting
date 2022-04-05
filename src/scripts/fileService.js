@@ -72,7 +72,7 @@ export const createIPFSMetaData = async (hashLipsImages, hashlipsMetaData, nftSt
         }
         const metadata = await nftStorageClient.store({
           ...hashlipsMetaData[index],
-          image: new File([sortedHashLipsImagesArray[index]], `${index}${fileType()}`, {
+          image: new File([sortedHashLipsImagesArray[index]], `${index+1}${fileType()}`, {
             type: sortedHashLipsImagesArray[index].type,
           })
         })

@@ -32,6 +32,7 @@
     "react-scripts": "latest",
     "styled-components": "latest"
   },
+  "author": "Patches <patches@turtlemoon.io>",
   "main": "public/electron.js",
   "build": {
     "appId": "tools.turtlemoon.io",

@@ -199,8 +199,10 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
   /* Get the token ID from the receipt */
   tokenId = receipt.tokenId;
 
+  let saveSupplyKey = supplyKey.toString()
   console.log('token Id',tokenId);
-  console.log('suppplyKey (KEEP SECRET)',supplyKey);
+  console.log('suppplyKey (KEEP SECRET)',saveSupplyKey);
+  localStorage.setItem('supplyKey_'+tokenId.toString(), saveSupplyKey)
 
   /* Mint the token */
   let nftIds = [];
@@ -255,7 +257,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
   console.log(mintData)
 
 
-  let saveSupplyKey = supplyKey.toString()
+
   let saveAdminKey = adminKey.toString()
   let saveFreezeKey = freezeKey.toString()
   // fs.appendFile(`../supplyKey.json`, saveSupplyKey, (err) => {

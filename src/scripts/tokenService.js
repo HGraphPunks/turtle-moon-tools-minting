@@ -169,7 +169,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
   supplyKey = PrivateKey.generate();
   
   freezeKey = PrivateKey.generate();
-
+  
   const tx = await new TokenCreateTransaction()
     .setTokenType(TokenType.NonFungibleUnique)
     .setTokenName(hashlipsToken.name)
@@ -183,9 +183,13 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
     .setAutoRenewAccountId(hashlipsToken.renewAccountId)
     .setSupplyKey(supplyKey)
     .setMaxTransactionFee(new Hbar(1000))
-    // .setAdminKey(adminKey)
-    // .setFreezeKey(freezeKey)
-    .freezeWith(client);
+    if (hashlipsToken.addAdminKey){
+      tx.setAdminKey(adminKey)
+    }
+    if (hashlipsToken.addFreezeKey){
+      tx.setFreezeKey(freezeKey) 
+    }
+    tx.freezeWith(client);
     
   // const transaction = await tx.signWithOperator(client);
   const transaction = await tx.sign(privateKey);

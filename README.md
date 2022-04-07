@@ -33,3 +33,12 @@ Donation HBAR Wallet Address:
 
 ### Share your creations on twitter with the hashtag #TMTNFT @TurtleMoonCC
 
+## Change Log
+
+### 0.9.3
+Changes:
+- Add in ability to add ADMIN key ad FREEZE key to single mints and bulk minting
+- Add ability to upload array of metadataJSON files already uploaded to IPFS
+- Add ability to hide token logs to reduce lag after giant mints
+- Increase file format support for single minting to all image files, videos, filetypes. TEST THIS ON TESTNET FIRST TO MAKE SURE FILETYPE IS SUPPORTED
+- Update Readme

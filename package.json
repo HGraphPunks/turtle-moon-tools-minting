@@ -1,6 +1,6 @@
 {
   "name": "turtle-moon-tools",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "private": false,
   "author": "Turtle Moon",
   "description": "Turtle Moon Tools - Minting",
@@ -32,6 +32,7 @@
     "react-scripts": "latest",
     "styled-components": "latest"
   },
+  "author": "Patches <patches@turtlemoon.io>",
   "main": "public/electron.js",
   "build": {
     "appId": "tools.turtlemoon.io",

@@ -55,13 +55,24 @@ export const singleImageMint = async (hederaMainnetEnv, token, user, setLoading)
 
 export const mintHashlips = async (hashlipsToken, user, hederaMainnetEnv, setLoading) => {
   const client = hederaClient(hederaMainnetEnv, user)
-  const hashLipsImages = document.getElementById("hl-images").files;
-  const hashLipsJSON = document.getElementById("hl-json").files;
-  const metaDataPath = hashLipsJSON[0].path;
-  let rawdata = fs.readFileSync(metaDataPath);
-  let hashlipsMetaData = JSON.parse(rawdata);
+  let uploadedCIDsMetadata
+  let hashLipsImages
+  let hashlipsMetaData
+  if (hashlipsToken.alreadyCreatedCIDs){
+    let uploadedCIDs = document.getElementById("cid-json").files;
+    const metaDataPath = uploadedCIDs[0].path;
+    const rawdata = fs.readFileSync(metaDataPath);
+    uploadedCIDsMetadata = JSON.parse(rawdata);
+  } else {
+    hashLipsImages = document.getElementById("hl-images").files;
+    let hashLipsJSON = document.getElementById("hl-json").files;
+    const metaDataPath = hashLipsJSON[0].path;
+    const rawdata = fs.readFileSync(metaDataPath);
+    hashlipsMetaData = JSON.parse(rawdata);
+  }
   
-  const metadataCIDs = await createIPFSMetaData(hashLipsImages, hashlipsMetaData, user.nftStorageAPI);
+  
+  const metadataCIDs = hashlipsToken.alreadyCreatedCIDs ? uploadedCIDsMetadata : await createIPFSMetaData(hashLipsImages, hashlipsMetaData, user.nftStorageAPI);
   console.log(hashlipsToken);
   console.log(metadataCIDs);
 
@@ -135,6 +146,9 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
     mintExisitngToken(client, hashlipsToken.previousTokenId, metadataCIDs, hederaMainnetEnv, setLoading)
     return
   }
+  if (hashlipsToken.alreadyCreatedCIDs) {
+    metadataCIDs = metadataCIDs.reverse()
+  }
     /* Create a royalty fee */
   const customRoyaltyFee = [];
   for (let index = 0; index < parseInt(hashlipsToken.numOfRoyaltyFees); index++) {
@@ -155,7 +169,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
   supplyKey = PrivateKey.generate();
   
   freezeKey = PrivateKey.generate();
-
+  
   const tx = await new TokenCreateTransaction()
     .setTokenType(TokenType.NonFungibleUnique)
     .setTokenName(hashlipsToken.name)
@@ -169,9 +183,13 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
     .setAutoRenewAccountId(hashlipsToken.renewAccountId)
     .setSupplyKey(supplyKey)
     .setMaxTransactionFee(new Hbar(1000))
-    // .setAdminKey(adminKey)
-    // .setFreezeKey(freezeKey)
-    .freezeWith(client);
+    if (hashlipsToken.addAdminKey){
+      tx.setAdminKey(adminKey)
+    }
+    if (hashlipsToken.addFreezeKey){
+      tx.setFreezeKey(freezeKey) 
+    }
+    tx.freezeWith(client);
     
   // const transaction = await tx.signWithOperator(client);
   const transaction = await tx.sign(privateKey);
@@ -185,7 +203,10 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
   /* Get the token ID from the receipt */
   tokenId = receipt.tokenId;
 
-  console.log(tokenId);
+  let saveSupplyKey = supplyKey.toString()
+  console.log('token Id',tokenId);
+  console.log('suppplyKey (KEEP SECRET)',saveSupplyKey);
+  localStorage.setItem('supplyKey_'+tokenId.toString(), saveSupplyKey)
 
   /* Mint the token */
   let nftIds = [];
@@ -240,7 +261,7 @@ export const createNFTs = async (client, hashlipsToken, metadataCIDs, userPk, he
   console.log(mintData)
 
 
-  let saveSupplyKey = supplyKey.toString()
+
   let saveAdminKey = adminKey.toString()
   let saveFreezeKey = freezeKey.toString()
   // fs.appendFile(`../supplyKey.json`, saveSupplyKey, (err) => {

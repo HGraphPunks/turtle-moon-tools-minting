@@ -232,7 +232,7 @@ export const Dashboard = () => {
           <TabContext value={tab}>
             <Box lg={{ borderBottom: 1, borderColor: 'divider' }}>
               <TabList variant="fullWidth" onChange={handleTabSelection} aria-label="lab API tabs example">
-                <Tab label="Hashlips Minting" value="1" />
+                <Tab label="Bulk Minting" value="1" />
                 <Tab label="Single Minting" value="2" />
               </TabList>
             </Box>

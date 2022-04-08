@@ -161,7 +161,7 @@ export default function App() {
           &nbsp;
           &nbsp;
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} style={{color: 'grey'}}>
-            Beta (v0.9.2) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
+            Beta (v0.9.3) &nbsp;<span style={{color:"#efefef"}}>{hederaMainnetEnv ? "Mainnet" : "Testnet"}</span>
           </Typography> 
           &nbsp;
           &nbsp;
